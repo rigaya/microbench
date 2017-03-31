@@ -36,8 +36,8 @@ section .text
     run_check 1, por, 2
     run_check 0, pand, 2
     run_check 1, pand, 2
-    run_check 0, pandn, 2
-    run_check 1, pandn, 2
+    run_check 0, pandn, 2 | OP_SKIP_0_3
+    run_check 1, pandn, 2 | OP_SKIP_0_3
     run_check 0, pxor, 2 | OP_SKIP_0_3
     run_check 1, pxor, 2 | OP_SKIP_0_3
 
@@ -52,8 +52,8 @@ section .text
     run_check 1, paddsw, 2
     run_check 0, pmullw, 2
     run_check 1, pmullw, 2
-    run_check 0, pmuldq, 2
-    run_check 1, pmuldq, 2
+    run_check 0, pmuludq, 2
+    run_check 1, pmuludq, 2
     run_check 0, pmulld, 2
     run_check 1, pmulld, 2
     run_check 0, pmaddwd, 2

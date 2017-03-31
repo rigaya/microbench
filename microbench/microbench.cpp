@@ -34,7 +34,7 @@
 #include <chrono>
 #include "cpu_info.h"
 
-#define TEST_COUNT 50000
+#define TEST_COUNT 20000
 #define BLOCK_SIZE 96
 
 #define PROTOTYPE(x) \
@@ -81,7 +81,7 @@ extern "C" {
     PROTOTYPE(paddw);
     PROTOTYPE(paddsw);
     PROTOTYPE(pmullw);
-    PROTOTYPE(pmuldq);
+    PROTOTYPE(pmuludq);
     PROTOTYPE(pmulld);
     PROTOTYPE(pmaddwd);
     PROTOTYPE(pmaddubsw);
