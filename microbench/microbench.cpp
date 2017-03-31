@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <chrono>
 #include "cpu_info.h"
+#include "simd_util.h"
 
 #define TEST_COUNT 20000
 #define BLOCK_SIZE 96
@@ -127,73 +128,74 @@ typedef struct {
     func_check latency;
     func_check throughput;
     int flops_per_128op;
+    uint32_t simd;
 } check_inst_t;
 
-#define CREATE_LIST(x, flops_128op) \
-    { #x,       runl_ ## x, runt_ ## x, flops_128op }, \
-    { #x "(256)", runl_ ## x ## _vex_256, runt_ ## x ## _vex_256, flops_128op * 2 }
+#define CREATE_LIST(simd_128, simd_256, x, flops_128op) \
+    { #x,       runl_ ## x, runt_ ## x, flops_128op, simd_128 }, \
+    { #x "(256)", runl_ ## x ## _vex_256, runt_ ## x ## _vex_256, flops_128op * 2, simd_256 }
 
-#define CREATE_LIST_VEX(x, flops_128op) \
-    { #x,       runl_ ## x ## _vex, runt_ ## x ## _vex, flops_128op }, \
-    { #x "(256)", runl_ ## x ## _vex_256, runt_ ## x ## _vex_256, flops_128op * 2 }
+#define CREATE_LIST_VEX(simd_128, simd_256, x, flops_128op) \
+    { #x,       runl_ ## x ## _vex, runt_ ## x ## _vex, flops_128op, simd_128 }, \
+    { #x "(256)", runl_ ## x ## _vex_256, runt_ ## x ## _vex_256, flops_128op * 2, simd_256 }
 
-#define CREATE_LIST_PAIR(x, flops_128op) \
-    { #x "",       runlp_ ## x, runtp_ ## x, flops_128op }, \
-    { #x "(256)", runlp_ ## x ## _vex_256, runtp_ ## x ## _vex_256, flops_128op * 2 }/*, \
-    { #x "serial",       runls_ ## x, runts_ ## x, flops_128op }, \
-    { #x "serial(256)", runls_ ## x ## _vex_256, runts_ ## x ## _vex_256, flops_128op * 2 }*/
+#define CREATE_LIST_PAIR(simd_128, simd_256, x, flops_128op) \
+    { #x "",       runlp_ ## x, runtp_ ## x, flops_128op, simd_128 }, \
+    { #x "(256)", runlp_ ## x ## _vex_256, runtp_ ## x ## _vex_256, flops_128op * 2, simd_256 }/*, \
+    { #x "serial",       runls_ ## x, runts_ ## x, flops_128op, simd_128 }, \
+    { #x "serial(256)", runls_ ## x ## _vex_256, runts_ ## x ## _vex_256, flops_128op * 2, simd_256 }*/
 
-#define CREATE_LIST_PAIR_VEX(x, flops_128op) \
-    { #x "",       runlp_ ## x ## _vex, runtp_ ## x ## _vex, flops_128op }, \
-    { #x "(256)", runlp_ ## x ## _vex_256, runtp_ ## x ## _vex_256, flops_128op * 2 }/*, \
-    { #x "serial",       runls_ ## x ## _vex, runts_ ## x ## _vex, flops_128op }, \
-    { #x "serial(256)", runls_ ## x ## _vex_256, runts_ ## x ## _vex_256, flops_128op * 2 }*/
+#define CREATE_LIST_PAIR_VEX(simd_128, simd_256, x, flops_128op) \
+    { #x "",       runlp_ ## x ## _vex, runtp_ ## x ## _vex, flops_128op, simd_128 }, \
+    { #x "(256)", runlp_ ## x ## _vex_256, runtp_ ## x ## _vex_256, flops_128op * 2, simd_256 }/*, \
+    { #x "serial",       runls_ ## x ## _vex, runts_ ## x ## _vex, flops_128op, simd_128 }, \
+    { #x "serial(256)", runls_ ## x ## _vex_256, runts_ ## x ## _vex_256, flops_128op * 2, simd_256 }*/
 
 check_inst_t check_list[] = {
-    CREATE_LIST(por,    0),
-    CREATE_LIST(pand,   0),
-    CREATE_LIST(pandn,  0),
-    CREATE_LIST(pxor,   0),
-    CREATE_LIST(psllw,  0),
-    CREATE_LIST(pslldq, 0),
-    CREATE_LIST(paddw,  0),
-    CREATE_LIST(paddsw, 0),
-    CREATE_LIST(pabsw,  0),
-    CREATE_LIST(pmullw, 0),
-    CREATE_LIST(pmuldq, 0),
-    CREATE_LIST(pmulld, 0),
-    CREATE_LIST(pmaddwd, 0),
-    CREATE_LIST(pmaddubsw, 0),
-    CREATE_LIST(pmaxsw, 0),
-    CREATE_LIST(pminsw, 0),
-    CREATE_LIST(pavgw,  0),
-    CREATE_LIST(punpckhwd,  0),
-    CREATE_LIST(palignr,  0),
-    CREATE_LIST(pshufb,  0),
-    CREATE_LIST(pblendw, 0),
-    CREATE_LIST_VEX(pblendvb, 0),
-    CREATE_LIST(addps,  4),
-    CREATE_LIST(addpd,  2),
-    CREATE_LIST(mulps,  4),
-    CREATE_LIST(mulpd,  2),
-    CREATE_LIST_PAIR(addps_mulps, 4),
-    CREATE_LIST_PAIR(addpd_mulpd, 2),
-    CREATE_LIST_VEX(fmadd132ps, 8),
-    CREATE_LIST_VEX(fmadd132pd, 4),
-    CREATE_LIST_PAIR_VEX(fmadd132ps_addps, 6),
-    CREATE_LIST_PAIR_VEX(fmadd132pd_addpd, 3),
-    CREATE_LIST_PAIR_VEX(fmadd132ps_mulps, 6),
-    CREATE_LIST_PAIR_VEX(fmadd132pd_mulpd, 3),
-    CREATE_LIST(divps,  0),
-    CREATE_LIST(divpd,  0),
-    CREATE_LIST(sqrtps, 0),
-    CREATE_LIST(sqrtpd, 0),
-    CREATE_LIST(rcpps,   0),
-    CREATE_LIST(rsqrtps, 0),
-    CREATE_LIST(maxps,  0),
-    CREATE_LIST(maxpd,  0),
-    CREATE_LIST(minps,  0),
-    CREATE_LIST(minpd,  0),
+    CREATE_LIST(SSE2,  AVX2, por,    0),
+    CREATE_LIST(SSE2,  AVX2, pand,   0),
+    CREATE_LIST(SSE2,  AVX2, pandn,  0),
+    CREATE_LIST(SSE2,  AVX2, pxor,   0),
+    CREATE_LIST(SSE2,  AVX2, psllw,  0),
+    CREATE_LIST(SSE2,  AVX2, pslldq, 0),
+    CREATE_LIST(SSE2,  AVX2, paddw,  0),
+    CREATE_LIST(SSE2,  AVX2, paddsw, 0),
+    CREATE_LIST(SSSE3, AVX2, pabsw,  0),
+    CREATE_LIST(SSE2,  AVX2, pmullw, 0),
+    CREATE_LIST(SSE2,  AVX2, pmuludq, 0),
+    CREATE_LIST(SSE41, AVX2, pmulld, 0),
+    CREATE_LIST(SSE2,  AVX2, pmaddwd, 0),
+    CREATE_LIST(SSSE3, AVX2, pmaddubsw, 0),
+    CREATE_LIST(SSE2,  AVX2, pmaxsw, 0),
+    CREATE_LIST(SSE2,  AVX2, pminsw, 0),
+    CREATE_LIST(SSE2,  AVX2, pavgw,  0),
+    CREATE_LIST(SSE2,  AVX2, punpckhwd,  0),
+    CREATE_LIST(SSSE3, AVX2, palignr,  0),
+    CREATE_LIST(SSSE3, AVX2, pshufb,  0),
+    CREATE_LIST(SSE41, AVX2, pblendw, 0),
+    CREATE_LIST_VEX(SSE41, AVX2, pblendvb, 0),
+    CREATE_LIST(SSE2, AVX, addps,  4),
+    CREATE_LIST(SSE2, AVX, addpd,  2),
+    CREATE_LIST(SSE2, AVX, mulps,  4),
+    CREATE_LIST(SSE2, AVX, mulpd,  2),
+    CREATE_LIST_PAIR(SSE2, AVX, addps_mulps, 4),
+    CREATE_LIST_PAIR(SSE2, AVX, addpd_mulpd, 2),
+    CREATE_LIST_VEX(AVX2, AVX2, fmadd132ps, 8),
+    CREATE_LIST_VEX(AVX2, AVX2, fmadd132pd, 4),
+    CREATE_LIST_PAIR_VEX(AVX2, AVX2, fmadd132ps_addps, 6),
+    CREATE_LIST_PAIR_VEX(AVX2, AVX2, fmadd132pd_addpd, 3),
+    CREATE_LIST_PAIR_VEX(AVX2, AVX2, fmadd132ps_mulps, 6),
+    CREATE_LIST_PAIR_VEX(AVX2, AVX2, fmadd132pd_mulpd, 3),
+    CREATE_LIST(SSE2, AVX, divps,  0),
+    CREATE_LIST(SSE2, AVX, divpd,  0),
+    CREATE_LIST(SSE2, AVX, sqrtps, 0),
+    CREATE_LIST(SSE2, AVX, sqrtpd, 0),
+    CREATE_LIST(SSE2, AVX, rcpps,   0),
+    CREATE_LIST(SSE2, AVX, rsqrtps, 0),
+    CREATE_LIST(SSE2, AVX, maxps,  0),
+    CREATE_LIST(SSE2, AVX, maxpd,  0),
+    CREATE_LIST(SSE2, AVX, minps,  0),
+    CREATE_LIST(SSE2, AVX, minpd,  0),
 };
 
 void warm_up() {
@@ -222,6 +224,7 @@ double get_tick_per_sec() {
 }
 
 int main(int argc, char **argv) {
+    const uint32_t simd_avail = get_availableSIMD();
     char buffer[256];
     getCPUInfo(buffer);
     fprintf(stdout, "%s\n", buffer);
@@ -236,27 +239,34 @@ int main(int argc, char **argv) {
     for (int i = 0; i < _countof(check_list); i++) {
         max_name_len = std::max(max_name_len, strlen(check_list[i].name));
     }
+    char name[256] = { 0 };
+    for (size_t j = 0; j < max_name_len; j++) {
+        name[j] = ' ';
+    }
+    fprintf(stdout, "%s Throughput,  Latency\n", name);
+    fprintf(stdout, "instruction%s        IPC,    Cycle\n", name + strlen("instruction"));
 
     const int loop_count = 25;
     for (int i = 0; i < _countof(check_list); i++) {
-        auto tick_t = INT64_MAX;
-        auto tick_l = INT64_MAX;
-        for (int j = 0; j < loop_count; j++) {
-            tick_t = std::min(tick_t, check_list[i].throughput(TEST_COUNT));
-            tick_l = std::min(tick_l, check_list[i].latency(TEST_COUNT));
+        if ((simd_avail & check_list[i].simd) == check_list[i].simd) {
+            auto tick_t = INT64_MAX;
+            auto tick_l = INT64_MAX;
+            for (int j = 0; j < loop_count; j++) {
+                tick_t = std::min(tick_t, check_list[i].throughput(TEST_COUNT));
+                tick_l = std::min(tick_l, check_list[i].latency(TEST_COUNT));
+            }
+            strcpy(name, check_list[i].name);
+            for (size_t j = strlen(name); j < max_name_len; j++) {
+                name[j] = ' ';
+            }
+            fprintf(stdout, "%s:  T: %5.2f, L: %5.2f", name,
+                TEST_COUNT * (double)BLOCK_SIZE * tick_per_clock / (double)tick_t,
+                1.0 / (TEST_COUNT * (double)BLOCK_SIZE * tick_per_clock / (double)tick_l));
+            if (check_list[i].flops_per_128op > 0) {
+                double flops = TEST_COUNT * (double)BLOCK_SIZE * check_list[i].flops_per_128op / (tick_t / tick_per_sec);
+                fprintf(stdout, ",  %5.1f GFLOPS", flops * 1e-9);
+            }
+            fprintf(stdout, "\n");
         }
-        char name[256] = { 0 };
-        strcpy(name, check_list[i].name);
-        for (size_t j = strlen(name); j < max_name_len; j++) {
-            name[j] = ' ';
-        }
-        fprintf(stdout, "%s:  T: %5.2f, L: %5.2f", name,
-            TEST_COUNT * (double)BLOCK_SIZE * tick_per_clock / (double)tick_t,
-            1.0 / (TEST_COUNT * (double)BLOCK_SIZE * tick_per_clock / (double)tick_l));
-        if (check_list[i].flops_per_128op > 0) {
-            double flops = TEST_COUNT * (double)BLOCK_SIZE * check_list[i].flops_per_128op / (tick_t / tick_per_sec);
-            fprintf(stdout, ",  %5.1f GFLOPS", flops * 1e-9);
-        }
-        fprintf(stdout, "\n");
     }
 }
