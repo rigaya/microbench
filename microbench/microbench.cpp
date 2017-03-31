@@ -196,10 +196,6 @@ check_inst_t check_list[] = {
     CREATE_LIST(minpd,  0),
 };
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
 void warm_up() {
     for (int i = 0; i < 1000; i++) {
         runl_por(TEST_COUNT);
