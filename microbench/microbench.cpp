@@ -197,7 +197,7 @@ check_inst_t check_list[] = {
 };
 
 void warm_up() {
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 2000; i++) {
         runl_por(TEST_COUNT);
     }
 }
@@ -227,6 +227,7 @@ int main(int argc, char **argv) {
     fprintf(stdout, "%s\n", buffer);
 
     SetThreadAffinityMask(GetCurrentThread(), 1);
+    warm_up();
     const double tick_per_clock = get_tick_per_clock();
     const double tick_per_sec = get_tick_per_sec();
     fprintf(stdout, "core frequency: %d MHz\n", (int)(tick_per_sec / tick_per_clock * 1e-6 + 0.5));
