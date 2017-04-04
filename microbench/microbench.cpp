@@ -182,7 +182,7 @@ check_inst_t check_list[] = {
     CREATE_LIST(SSSE3, AVX2, palignr,  0),
     CREATE_LIST(SSSE3, AVX2, pshufb,  0),
     CREATE_LIST(SSE41, AVX2, pblendw, 0),
-    CREATE_LIST_VEX(SSE41, AVX2, pblendvb, 0),
+    CREATE_LIST_VEX(AVX, AVX2, pblendvb, 0),
     CREATE_LIST(SSE2, AVX, addps,  4),
     CREATE_LIST(SSE2, AVX, addpd,  2),
     CREATE_LIST(SSE2, AVX, mulps,  4),
