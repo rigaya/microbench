@@ -40,6 +40,7 @@ enum {
     POPCNT = 0x0020,
     AVX    = 0x0040,
     AVX2   = 0x0080,
+    RDTSCP = 0x1000,
 };
 
 uint32_t get_availableSIMD();

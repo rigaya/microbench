@@ -381,12 +381,18 @@
 %else
     %define FUNC_TYPE l
 %endif
+%ifdef USE_RDTSCP
+    %define RDTSC_TYPE p
+%else
+    %define RDTSC_TYPE 
+%endif
 
-    global run %+ FUNC_TYPE %+ _ %+ %2 %+ STR_VEX %+ STR_SIMD_WIDTH
+    global run %+ RDTSC_TYPE %+ FUNC_TYPE %+ _ %+ %2 %+ STR_VEX %+ STR_SIMD_WIDTH
 
-    run %+ FUNC_TYPE %+ _ %+ %2 %+ STR_VEX %+ STR_SIMD_WIDTH:
+    run %+ RDTSC_TYPE %+ FUNC_TYPE %+ _ %+ %2 %+ STR_VEX %+ STR_SIMD_WIDTH:
         push rbx
-        mov rbx, rcx
+        push rsi
+        mov esi, ecx
         mov r9, rsp
         sub rsp, regsize*10
         and rsp, -32
@@ -402,8 +408,14 @@
         MOVAPS [rsp+regsize*9], rmm15
         
         test_throughput xorps, 2
-
+        
+        xor rax, rax
+        cpuid
+%ifdef USE_RDTSCP
         rdtscp
+%else
+        rdtsc
+%endif
         shl rdx, 32
         or rdx, rax
         mov r8, rdx
@@ -448,11 +460,15 @@
             %endif
         %endif
 
-        dec rbx
+        dec esi
         jnz ._LOOP
 
-        
+%ifdef USE_RDTSCP
         rdtscp
+%else
+        mfence
+        rdtsc
+%endif
         shl rdx, 32
         or rax, rdx
 
@@ -471,6 +487,7 @@
 
         mov rsp, r9
 
+        pop rsi
         pop rbx
 %ifdef USE_VEX
         vzeroupper
@@ -492,11 +509,18 @@
     %define PAIR_TYPE s
 %endif
 
-    global run %+ FUNC_TYPE %+ PAIR_TYPE %+ _ %+ %2 %+ _ %+ %4 %+ STR_VEX %+ STR_SIMD_WIDTH
+%ifdef USE_RDTSCP
+    %define RDTSC_TYPE p
+%else
+    %define RDTSC_TYPE 
+%endif
 
-    run %+ FUNC_TYPE %+ PAIR_TYPE %+ _ %+ %2 %+ _ %+ %4 %+  STR_VEX %+ STR_SIMD_WIDTH:
+    global run %+ RDTSC_TYPE %+ FUNC_TYPE %+ PAIR_TYPE %+ _ %+ %2 %+ _ %+ %4 %+ STR_VEX %+ STR_SIMD_WIDTH
+
+    run %+ RDTSC_TYPE %+ FUNC_TYPE %+ PAIR_TYPE %+ _ %+ %2 %+ _ %+ %4 %+  STR_VEX %+ STR_SIMD_WIDTH:
         push rbx
-        mov rbx, rcx
+        push rsi
+        mov esi, ecx
         mov r9, rsp
         sub rsp, regsize*10
         and rsp, -32
@@ -513,7 +537,13 @@
         
         test_throughput xorps, 2
 
+        xor rax, rax
+        cpuid
+%ifdef USE_RDTSCP
         rdtscp
+%else
+        rdtsc
+%endif
         shl rdx, 32
         or rdx, rax
         mov r8, rdx
@@ -533,11 +563,15 @@
             test_latency_pair %2, %3, %4, %5
         %endif
 
-        dec rbx
+        dec esi
         jnz ._LOOP
 
-        
+%ifdef USE_RDTSCP
         rdtscp
+%else
+        mfence
+        rdtsc
+%endif
         shl rdx, 32
         or rax, rdx
 
@@ -555,7 +589,8 @@
         MOVAPS rmm15, [rsp+regsize*9]
 
         mov rsp, r9
-
+        
+        pop rsi
         pop rbx
 %ifdef USE_VEX
         vzeroupper

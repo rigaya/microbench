@@ -173,8 +173,8 @@
     <None Include="microbench.inc" />
     <CustomBuild Include="microbench_x64.asm">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">yasm -a x86 -f win64 -p nasm -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">yasm -a x86 -f win64 -p nasm -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">yasm -a x86 -f win64 -DUSE_RDTSCP=1 -p nasm -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">yasm -a x86 -f win64 -DUSE_RDTSCP=1 -p nasm -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling asm...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling asm...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)obj\%(Filename).asm.obj</Outputs>
@@ -182,8 +182,8 @@
     </CustomBuild>
     <CustomBuild Include="microbench_x64_avx256.asm">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">yasm -a x86 -f win64 -p nasm -DSIMD256=1 -DUSE_VEX=1 -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">yasm -a x86 -f win64 -p nasm -DSIMD256=1 -DUSE_VEX=1 -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">yasm -a x86 -f win64 -p nasm -DUSE_RDTSCP=1 -DSIMD256=1 -DUSE_VEX=1 -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">yasm -a x86 -f win64 -p nasm -DUSE_RDTSCP=1 -DSIMD256=1 -DUSE_VEX=1 -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling asm...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling asm...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)obj\%(Filename).asm.obj</Outputs>
@@ -193,8 +193,17 @@
     </CustomBuild>
     <CustomBuild Include="microbench_x64_avx128.asm">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">yasm -a x86 -f win64 -p nasm -DUSE_VEX=1 -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">yasm -a x86 -f win64 -p nasm -DUSE_VEX=1 -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">yasm -a x86 -f win64 -p nasm -DUSE_RDTSCP=1 -DUSE_VEX=1 -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">yasm -a x86 -f win64 -p nasm -DUSE_RDTSCP=1 -DUSE_VEX=1 -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling asm...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling asm...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)obj\%(Filename).asm.obj</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)obj\%(Filename).asm.obj</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="microbench_x64_rdtsc.asm">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">yasm -a x86 -f win64 -p nasm -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">yasm -a x86 -f win64 -p nasm -l "$(OutDir)obj\%(Filename).asm.lst" -o "$(OutDir)obj\%(Filename).asm.obj" "%(FullPath)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling asm...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling asm...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)obj\%(Filename).asm.obj</Outputs>

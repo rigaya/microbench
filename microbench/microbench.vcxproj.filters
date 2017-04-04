@@ -29,7 +29,7 @@
     <None Include="microbench.inc">
       <Filter>ヘッダー ファイル</Filter>
     </None>
-    <None Include="microbench_x64_vex.asm">
+    <None Include="microbench_x64_rdtsc.asm">
       <Filter>ソース ファイル</Filter>
     </None>
   </ItemGroup>
@@ -38,6 +38,9 @@
       <Filter>ソース ファイル</Filter>
     </CustomBuild>
     <CustomBuild Include="microbench_x64_avx256.asm">
+      <Filter>ソース ファイル</Filter>
+    </CustomBuild>
+    <CustomBuild Include="microbench_x64_avx128.asm">
       <Filter>ソース ファイル</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -47,5 +47,10 @@ uint32_t get_availableSIMD() {
     __cpuid(CPUInfo, 7);
     if ((simd & AVX) && (CPUInfo[1] & 0x00000020))
         simd |= AVX2;
+    //rdtscp命令のチェック (Fn:8000_0001:EDX27)
+    __cpuid(CPUInfo, 0x80000001);
+    if (CPUInfo[3] & (1<<27)) {
+        simd |= RDTSCP;
+    }
     return simd;
 }

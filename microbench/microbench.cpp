@@ -41,34 +41,40 @@
 #define PROTOTYPE(x) \
     extern int64_t runt_ ## x(uint32_t count); \
     extern int64_t runl_ ## x(uint32_t count); \
-    extern int64_t runt_ ## x ## _vex_256(uint32_t count); \
-    extern int64_t runl_ ## x ## _vex_256(uint32_t count);
+    extern int64_t runpt_ ## x(uint32_t count); \
+    extern int64_t runpl_ ## x(uint32_t count); \
+    extern int64_t runpt_ ## x ## _vex_256(uint32_t count); \
+    extern int64_t runpl_ ## x ## _vex_256(uint32_t count);
 
 #define PROTOTYPE_VEX(x) \
-    extern int64_t runt_ ## x ## _vex(uint32_t count); \
-    extern int64_t runl_ ## x ## _vex(uint32_t count); \
-    extern int64_t runt_ ## x ## _vex_256(uint32_t count); \
-    extern int64_t runl_ ## x ## _vex_256(uint32_t count);
+    extern int64_t runpt_ ## x ## _vex(uint32_t count); \
+    extern int64_t runpl_ ## x ## _vex(uint32_t count); \
+    extern int64_t runpt_ ## x ## _vex_256(uint32_t count); \
+    extern int64_t runpl_ ## x ## _vex_256(uint32_t count);
 
 #define PROTOTYPE_PAIR(x) \
     extern int64_t runtp_ ## x(uint32_t count); \
     extern int64_t runlp_ ## x(uint32_t count); \
-    extern int64_t runtp_ ## x ## _vex_256(uint32_t count); \
-    extern int64_t runlp_ ## x ## _vex_256(uint32_t count); \
+    extern int64_t runptp_ ## x(uint32_t count); \
+    extern int64_t runplp_ ## x(uint32_t count); \
+    extern int64_t runptp_ ## x ## _vex_256(uint32_t count); \
+    extern int64_t runplp_ ## x ## _vex_256(uint32_t count); \
     extern int64_t runts_ ## x(uint32_t count); \
     extern int64_t runls_ ## x(uint32_t count); \
-    extern int64_t runts_ ## x ## _vex_256(uint32_t count); \
-    extern int64_t runls_ ## x ## _vex_256(uint32_t count);
+    extern int64_t runpts_ ## x(uint32_t count); \
+    extern int64_t runpls_ ## x(uint32_t count); \
+    extern int64_t runpts_ ## x ## _vex_256(uint32_t count); \
+    extern int64_t runpls_ ## x ## _vex_256(uint32_t count);
 
 #define PROTOTYPE_PAIR_VEX(x) \
-    extern int64_t runtp_ ## x ## _vex(uint32_t count); \
-    extern int64_t runlp_ ## x ## _vex(uint32_t count); \
-    extern int64_t runtp_ ## x ## _vex_256(uint32_t count); \
-    extern int64_t runlp_ ## x ## _vex_256(uint32_t count); \
-    extern int64_t runts_ ## x ## _vex(uint32_t count); \
-    extern int64_t runls_ ## x ## _vex(uint32_t count); \
-    extern int64_t runts_ ## x ## _vex_256(uint32_t count); \
-    extern int64_t runls_ ## x ## _vex_256(uint32_t count);
+    extern int64_t runptp_ ## x ## _vex(uint32_t count); \
+    extern int64_t runplp_ ## x ## _vex(uint32_t count); \
+    extern int64_t runptp_ ## x ## _vex_256(uint32_t count); \
+    extern int64_t runplp_ ## x ## _vex_256(uint32_t count); \
+    extern int64_t runpts_ ## x ## _vex(uint32_t count); \
+    extern int64_t runpls_ ## x ## _vex(uint32_t count); \
+    extern int64_t runpts_ ## x ## _vex_256(uint32_t count); \
+    extern int64_t runpls_ ## x ## _vex_256(uint32_t count);
 
 #ifdef __cplusplus
 extern "C" {
@@ -133,23 +139,25 @@ typedef struct {
 
 #define CREATE_LIST(simd_128, simd_256, x, flops_128op) \
     { #x,       runl_ ## x, runt_ ## x, flops_128op, simd_128 }, \
-    { #x "(256)", runl_ ## x ## _vex_256, runt_ ## x ## _vex_256, flops_128op * 2, simd_256 }
+    { #x,       runpl_ ## x, runpt_ ## x, flops_128op, simd_128 | RDTSCP }, \
+    { #x "(256)", runpl_ ## x ## _vex_256, runpt_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }
 
 #define CREATE_LIST_VEX(simd_128, simd_256, x, flops_128op) \
-    { #x,       runl_ ## x ## _vex, runt_ ## x ## _vex, flops_128op, simd_128 }, \
-    { #x "(256)", runl_ ## x ## _vex_256, runt_ ## x ## _vex_256, flops_128op * 2, simd_256 }
+    { #x,       runpl_ ## x ## _vex, runpt_ ## x ## _vex, flops_128op, simd_128 | RDTSCP }, \
+    { #x "(256)", runpl_ ## x ## _vex_256, runpt_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }
 
 #define CREATE_LIST_PAIR(simd_128, simd_256, x, flops_128op) \
     { #x "",       runlp_ ## x, runtp_ ## x, flops_128op, simd_128 }, \
-    { #x "(256)", runlp_ ## x ## _vex_256, runtp_ ## x ## _vex_256, flops_128op * 2, simd_256 }/*, \
-    { #x "serial",       runls_ ## x, runts_ ## x, flops_128op, simd_128 }, \
-    { #x "serial(256)", runls_ ## x ## _vex_256, runts_ ## x ## _vex_256, flops_128op * 2, simd_256 }*/
+    { #x "",       runplp_ ## x, runptp_ ## x, flops_128op, simd_128 | RDTSCP }, \
+    { #x "(256)", runplp_ ## x ## _vex_256, runptp_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }/*, \
+    { #x "serial",       runpls_ ## x, runpts_ ## x, flops_128op, simd_128 }, \
+    { #x "serial(256)", runpls_ ## x ## _vex_256, runpts_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }*/
 
 #define CREATE_LIST_PAIR_VEX(simd_128, simd_256, x, flops_128op) \
-    { #x "",       runlp_ ## x ## _vex, runtp_ ## x ## _vex, flops_128op, simd_128 }, \
-    { #x "(256)", runlp_ ## x ## _vex_256, runtp_ ## x ## _vex_256, flops_128op * 2, simd_256 }/*, \
-    { #x "serial",       runls_ ## x ## _vex, runts_ ## x ## _vex, flops_128op, simd_128 }, \
-    { #x "serial(256)", runls_ ## x ## _vex_256, runts_ ## x ## _vex_256, flops_128op * 2, simd_256 }*/
+    { #x "",       runplp_ ## x ## _vex, runptp_ ## x ## _vex, flops_128op, simd_128 | RDTSCP }, \
+    { #x "(256)", runplp_ ## x ## _vex_256, runptp_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }/*, \
+    { #x "serial",       runpls_ ## x ## _vex, runpts_ ## x ## _vex, flops_128op, simd_128 | RDTSCP }, \
+    { #x "serial(256)", runpls_ ## x ## _vex_256, runpts_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }*/
 
 check_inst_t check_list[] = {
     CREATE_LIST(SSE2,  AVX2, por,    0),
@@ -248,7 +256,8 @@ int main(int argc, char **argv) {
 
     const int loop_count = 25;
     for (int i = 0; i < _countof(check_list); i++) {
-        if ((simd_avail & check_list[i].simd) == check_list[i].simd) {
+        if ((simd_avail & RDTSCP) == (check_list[i].simd & RDTSCP)
+            && (simd_avail & check_list[i].simd) == check_list[i].simd) {
             auto tick_t = INT64_MAX;
             auto tick_l = INT64_MAX;
             for (int j = 0; j < loop_count; j++) {
