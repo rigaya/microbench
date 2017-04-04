@@ -112,6 +112,9 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <ResourceCompile>
+      <AdditionalOptions>/c 65001 %(AdditionalOptions)</AdditionalOptions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -163,6 +166,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <ResourceCompile>
+      <AdditionalOptions>/c 65001 %(AdditionalOptions)</AdditionalOptions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cpu_info.cpp" />
@@ -212,8 +218,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpu_info.h" />
+    <ClInclude Include="microbench_version.h" />
     <ClInclude Include="osdep.h" />
     <ClInclude Include="simd_util.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="microbench.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

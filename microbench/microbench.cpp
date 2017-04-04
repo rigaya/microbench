@@ -34,6 +34,7 @@
 #include <chrono>
 #include "cpu_info.h"
 #include "simd_util.h"
+#include "microbench_version.h"
 
 #define TEST_COUNT 20000
 #define BLOCK_SIZE 96
@@ -235,6 +236,7 @@ int main(int argc, char **argv) {
     const uint32_t simd_avail = get_availableSIMD();
     char buffer[256];
     getCPUInfo(buffer);
+    fprintf(stdout, "microbench " VER_STR_FILEVERSION " by rigaya\n");
     fprintf(stdout, "%s\n", buffer);
 
     SetThreadAffinityMask(GetCurrentThread(), 1);
