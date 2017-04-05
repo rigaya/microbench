@@ -69,6 +69,8 @@ section .text
     run_check 1, pminsw, 2
     run_check 0, pavgw, 2
     run_check 1, pavgw, 2
+    run_check 0, psadbw, 2
+    run_check 1, psadbw, 2
     
     run_check 0, punpckhwd, 2
     run_check 1, punpckhwd, 2
