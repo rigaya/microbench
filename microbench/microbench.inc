@@ -25,6 +25,14 @@
 ;
 ; --------------------------------------------------------------------------------------------
 
+bits 64
+default rel
+
+extern INIT_DIVIDEND_F
+extern INIT_DIVIDEND_D
+extern INIT_DIVIDER_F
+extern INIT_DIVIDER_D
+
 %ifdef SIMD256
     %define STR_SIMD_WIDTH _256
 %else
@@ -40,6 +48,8 @@
 %define OP_TYPE      0x07
 %define OP_ADD_IMD   0x08
 %define OP_SKIP_0_3  0x10
+%define OP_DIV_F     0x20
+%define OP_DIV_D     0x40
 
 %ifdef SIMD256
     %define rmm0  ymm0
@@ -375,6 +385,27 @@
     inst_same_reg %3, rmm5, %4
 %endmacro
 
+%macro init_reg_div 1
+    %if ((%1) & OP_DIV_F) != 0
+        MOVAPS rmm0, [INIT_DIVIDER_F]
+        MOVAPS rmm4, [INIT_DIVIDEND_F]
+    %else
+        MOVAPS rmm0, [INIT_DIVIDER_D]
+        MOVAPS rmm4, [INIT_DIVIDEND_D]
+    %endif
+    MOVAPS rmm5, rmm4
+    MOVAPS rmm6, rmm4
+    MOVAPS rmm7, rmm4
+    MOVAPS rmm8, rmm4
+    MOVAPS rmm9, rmm4
+    MOVAPS rmm10, rmm4
+    MOVAPS rmm11, rmm4
+    MOVAPS rmm12, rmm4
+    MOVAPS rmm13, rmm4
+    MOVAPS rmm14, rmm4
+    MOVAPS rmm15, rmm4
+%endmacro
+
 %macro run_check 3
 %if %1 = 0
     %define FUNC_TYPE t
@@ -407,7 +438,11 @@
         MOVAPS [rsp+regsize*8], rmm14
         MOVAPS [rsp+regsize*9], rmm15
         
+%if ((%3) & (OP_DIV_F | OP_DIV_D)) != 0
+        init_reg_div %3
+%else
         test_throughput xorps, 2
+%endif
         
         xor rax, rax
         cpuid
@@ -535,7 +570,11 @@
         MOVAPS [rsp+regsize*8], rmm14
         MOVAPS [rsp+regsize*9], rmm15
         
+%if ((%3) & (OP_DIV_F | OP_DIV_D)) != 0
+        init_reg_div %3
+%else
         test_throughput xorps, 2
+%endif
 
         xor rax, rax
         cpuid

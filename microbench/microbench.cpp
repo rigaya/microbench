@@ -124,6 +124,11 @@ extern "C" {
     PROTOTYPE_PAIR_VEX(fmadd132pd_addpd);
     PROTOTYPE_PAIR_VEX(fmadd132ps_mulps);
     PROTOTYPE_PAIR_VEX(fmadd132pd_mulpd);
+
+    alignas(32) float  INIT_DIVIDEND_F[8];
+    alignas(32) double INIT_DIVIDEND_D[4];
+    alignas(32) float  INIT_DIVIDER_F[8];
+    alignas(32) double INIT_DIVIDER_D[4];
 #ifdef __cplusplus
 }
 #endif
@@ -207,6 +212,21 @@ check_inst_t check_list[] = {
     CREATE_LIST(SSE2, AVX, minpd,  0),
 };
 
+void init_const() {
+    for (int i = 0; i < _countof(INIT_DIVIDEND_F); i++) {
+        INIT_DIVIDEND_F[i] = FLT_MAX;
+    }
+    for (int i = 0; i < _countof(INIT_DIVIDEND_D); i++) {
+        INIT_DIVIDEND_D[i] = DBL_MAX;
+    }
+    for (int i = 0; i < _countof(INIT_DIVIDER_F); i++) {
+        INIT_DIVIDER_F[i] = 1.0f + FLT_EPSILON;
+    }
+    for (int i = 0; i < _countof(INIT_DIVIDER_D); i++) {
+        INIT_DIVIDER_D[i] = 1.0 + DBL_EPSILON;
+    }
+}
+
 void warm_up() {
     for (int i = 0; i < 2000; i++) {
         runl_por(TEST_COUNT);
@@ -233,6 +253,7 @@ double get_tick_per_sec() {
 }
 
 int main(int argc, char **argv) {
+    init_const();
     const uint32_t simd_avail = get_availableSIMD();
     char buffer[256];
     getCPUInfo(buffer);

@@ -87,14 +87,14 @@ section .text
     run_check 1, mulps, 2
     run_check 0, mulpd, 2
     run_check 1, mulpd, 2
-    run_check 0, divps, 2
-    run_check 1, divps, 2
-    run_check 0, divpd, 2
-    run_check 1, divpd, 2
-    run_check 0, sqrtps, 1
-    run_check 1, sqrtps, 1
-    run_check 0, sqrtpd, 1
-    run_check 1, sqrtpd, 1
+    run_check 0, divps, 2 | OP_SKIP_0_3 | OP_DIV_F
+    run_check 1, divps, 2 | OP_SKIP_0_3 | OP_DIV_F
+    run_check 0, divpd, 2 | OP_SKIP_0_3 | OP_DIV_D
+    run_check 1, divpd, 2 | OP_SKIP_0_3 | OP_DIV_D
+    run_check 0, sqrtps, 1 | OP_SKIP_0_3 | OP_DIV_F
+    run_check 1, sqrtps, 1 | OP_SKIP_0_3 | OP_DIV_F
+    run_check 0, sqrtpd, 1 | OP_SKIP_0_3 | OP_DIV_D
+    run_check 1, sqrtpd, 1 | OP_SKIP_0_3 | OP_DIV_D
     run_check 0, rcpps, 1
     run_check 1, rcpps, 1
     run_check 0, rsqrtps, 1
