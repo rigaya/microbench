@@ -50,6 +50,10 @@ section .text
     run_check 1, paddw, 2
     run_check 0, paddsw, 2
     run_check 1, paddsw, 2
+    run_check 0, paddd, 2
+    run_check 1, paddd, 2
+    run_check 0, paddq, 2
+    run_check 1, paddq, 2
     run_check 0, pmullw, 2
     run_check 1, pmullw, 2
     run_check 0, pmuludq, 2
@@ -72,6 +76,16 @@ section .text
     run_check 0, psadbw, 2
     run_check 1, psadbw, 2
     
+    run_check 0, packssdw, 2 
+    run_check 1, packssdw, 2
+    run_check 0, pmovsxwd, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
+    run_check 1, pmovsxwd, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
+    run_check 0, packsswb, 2 
+    run_check 1, packsswb, 2
+    run_check 0, pmovsxbw, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
+    run_check 1, pmovsxbw, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
+    run_check 0, pmovsxbd, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
+    run_check 1, pmovsxbd, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
     run_check 0, punpckhwd, 2 
     run_check 1, punpckhwd, 2
     run_check 0, palignr, 2 | OP_ADD_IMD

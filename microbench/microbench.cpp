@@ -110,6 +110,11 @@ extern "C" {
     PROTOTYPE(pminsw);
     PROTOTYPE(pavgw);
     PROTOTYPE(psadbw);
+    PROTOTYPE(packssdw);
+    PROTOTYPE(pmovsxwd);
+    PROTOTYPE(packsswb);
+    PROTOTYPE(pmovsxbw);
+    PROTOTYPE(pmovsxbd);
     PROTOTYPE(punpckhwd);
     PROTOTYPE(palignr);
     PROTOTYPE(pshufb);
@@ -213,6 +218,11 @@ check_inst_t check_list[] = {
     CREATE_LIST(SSE2,  AVX2, pminsw, 0),
     CREATE_LIST(SSE2,  AVX2, pavgw,  0),
     CREATE_LIST(SSE2,  AVX2, psadbw, 0),
+    CREATE_LIST(SSE2,  AVX2, packssdw,  0),
+    CREATE_LIST(SSE41, AVX2, pmovsxwd,  0),
+    CREATE_LIST(SSE2,  AVX2, packsswb,  0),
+    CREATE_LIST(SSE41, AVX2, pmovsxbw,  0),
+    CREATE_LIST(SSE41, AVX2, pmovsxbd,  0),
     CREATE_LIST(SSE2,  AVX2, punpckhwd,  0),
     CREATE_LIST(SSSE3, AVX2, palignr,  0),
     CREATE_LIST(SSSE3, AVX2, pshufb,  0),
