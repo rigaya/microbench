@@ -78,6 +78,8 @@ section .text
     run_check 1, pshufb, 2
     run_check 0, pblendw, 2 | OP_ADD_IMD
     run_check 1, pblendw, 2 | OP_ADD_IMD
+    run_check 0, pblendvb, 3 | OP_SKIP_0_3
+    run_check 1, pblendvb, 3 | OP_SKIP_0_3
 
     run_check 0, addps, 2
     run_check 1, addps, 2

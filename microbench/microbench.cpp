@@ -39,6 +39,12 @@
 #define TEST_COUNT 20000
 #define BLOCK_SIZE 96
 
+#define PROTOTYPE_NO_256(x) \
+    extern int64_t runt_ ## x(uint32_t count); \
+    extern int64_t runl_ ## x(uint32_t count); \
+    extern int64_t runpt_ ## x(uint32_t count); \
+    extern int64_t runpl_ ## x(uint32_t count);
+
 #define PROTOTYPE(x) \
     extern int64_t runt_ ## x(uint32_t count); \
     extern int64_t runl_ ## x(uint32_t count); \
@@ -101,6 +107,7 @@ extern "C" {
     PROTOTYPE(palignr);
     PROTOTYPE(pshufb);
     PROTOTYPE(pblendw);
+    PROTOTYPE_NO_256(pblendvb);
     PROTOTYPE_VEX(pblendvb);
     PROTOTYPE(addps);
     PROTOTYPE(addpd);
@@ -143,13 +150,17 @@ typedef struct {
     uint32_t simd;
 } check_inst_t;
 
+#define CREATE_LIST_NO256(simd_128, x, flops_128op) \
+    { #x,       runl_ ## x, runt_ ## x, flops_128op, simd_128 }, \
+    { #x,       runpl_ ## x, runpt_ ## x, flops_128op, simd_128 | RDTSCP }
+
 #define CREATE_LIST(simd_128, simd_256, x, flops_128op) \
     { #x,       runl_ ## x, runt_ ## x, flops_128op, simd_128 }, \
     { #x,       runpl_ ## x, runpt_ ## x, flops_128op, simd_128 | RDTSCP }, \
     { #x "(256)", runpl_ ## x ## _vex_256, runpt_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }
 
 #define CREATE_LIST_VEX(simd_128, simd_256, x, flops_128op) \
-    { #x,       runpl_ ## x ## _vex, runpt_ ## x ## _vex, flops_128op, simd_128 | RDTSCP }, \
+    { #x "(vex)", runpl_ ## x ## _vex, runpt_ ## x ## _vex, flops_128op, simd_128 | RDTSCP }, \
     { #x "(256)", runpl_ ## x ## _vex_256, runpt_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }
 
 #define CREATE_LIST_PAIR(simd_128, simd_256, x, flops_128op) \
@@ -160,7 +171,7 @@ typedef struct {
     { #x "serial(256)", runpls_ ## x ## _vex_256, runpts_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }*/
 
 #define CREATE_LIST_PAIR_VEX(simd_128, simd_256, x, flops_128op) \
-    { #x "",       runplp_ ## x ## _vex, runptp_ ## x ## _vex, flops_128op, simd_128 | RDTSCP }, \
+    { #x "(128)", runplp_ ## x ## _vex, runptp_ ## x ## _vex, flops_128op, simd_128 | RDTSCP }, \
     { #x "(256)", runplp_ ## x ## _vex_256, runptp_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }/*, \
     { #x "serial",       runpls_ ## x ## _vex, runpts_ ## x ## _vex, flops_128op, simd_128 | RDTSCP }, \
     { #x "serial(256)", runpls_ ## x ## _vex_256, runpts_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }*/
@@ -187,6 +198,7 @@ check_inst_t check_list[] = {
     CREATE_LIST(SSSE3, AVX2, palignr,  0),
     CREATE_LIST(SSSE3, AVX2, pshufb,  0),
     CREATE_LIST(SSE41, AVX2, pblendw, 0),
+    CREATE_LIST_NO256(SSSE3, pblendvb, 0),
     CREATE_LIST_VEX(AVX, AVX2, pblendvb, 0),
     CREATE_LIST(SSE2, AVX, addps,  4),
     CREATE_LIST(SSE2, AVX, addpd,  2),
