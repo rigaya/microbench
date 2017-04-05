@@ -34,6 +34,8 @@ section .text
 
     run_check 0, pblendvb, 4
     run_check 1, pblendvb, 4
+    run_check 0, pblendd, 3 | OP_ADD_IMD
+    run_check 1, pblendd, 3 | OP_ADD_IMD
 
     run_check 0, fmadd132ps, 3
     run_check 1, fmadd132ps, 3

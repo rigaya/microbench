@@ -110,6 +110,7 @@ extern "C" {
     PROTOTYPE(pblendw);
     PROTOTYPE_NO_256(pblendvb);
     PROTOTYPE_VEX(pblendvb);
+    PROTOTYPE_VEX(pblendd);
     PROTOTYPE(addps);
     PROTOTYPE(addpd);
     PROTOTYPE(mulps);
@@ -202,6 +203,7 @@ check_inst_t check_list[] = {
     CREATE_LIST(SSE41, AVX2, pblendw, 0),
     CREATE_LIST_NO256(SSSE3, pblendvb, 0),
     CREATE_LIST_VEX(AVX, AVX2, pblendvb, 0),
+    CREATE_LIST_VEX(AVX2, AVX2, pblendd, 0),
     CREATE_LIST(SSE2, AVX, addps,  4),
     CREATE_LIST(SSE2, AVX, addpd,  2),
     CREATE_LIST(SSE2, AVX, mulps,  4),

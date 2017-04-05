@@ -82,6 +82,8 @@ section .text
     run_check 1, pblendw, 2 | OP_ADD_IMD
     run_check 0, pblendvb, 4
     run_check 1, pblendvb, 4
+    run_check 0, pblendd, 3 | OP_ADD_IMD
+    run_check 1, pblendd, 3 | OP_ADD_IMD
     
     run_check 0, addps, 2
     run_check 1, addps, 2
