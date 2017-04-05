@@ -98,6 +98,8 @@ extern "C" {
     PROTOTYPE(pslldq);
     PROTOTYPE(paddw);
     PROTOTYPE(paddsw);
+    PROTOTYPE(paddd);
+    PROTOTYPE(paddq);
     PROTOTYPE(pmullw);
     PROTOTYPE(pmuludq);
     PROTOTYPE(pmulld);
@@ -199,6 +201,8 @@ check_inst_t check_list[] = {
     CREATE_LIST(SSE2,  AVX2, pslldq, 0),
     CREATE_LIST(SSE2,  AVX2, paddw,  0),
     CREATE_LIST(SSE2,  AVX2, paddsw, 0),
+    CREATE_LIST(SSE2,  AVX2, paddd,  0),
+    CREATE_LIST(SSE2,  AVX2, paddq,  0),
     CREATE_LIST(SSSE3, AVX2, pabsw,  0),
     CREATE_LIST(SSE2,  AVX2, pmullw, 0),
     CREATE_LIST(SSE2,  AVX2, pmuludq, 0),

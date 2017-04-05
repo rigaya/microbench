@@ -50,6 +50,10 @@ section .text
     run_check 1, paddw, 2
     run_check 0, paddsw, 2
     run_check 1, paddsw, 2
+    run_check 0, paddd, 2
+    run_check 1, paddd, 2
+    run_check 0, paddq, 2
+    run_check 1, paddq, 2
     run_check 0, pmullw, 2
     run_check 1, pmullw, 2
     run_check 0, pmuludq, 2
