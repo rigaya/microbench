@@ -84,6 +84,16 @@ section .text
     run_check 1, pblendvb, 4
     run_check 0, pblendd, 3 | OP_ADD_IMD
     run_check 1, pblendd, 3 | OP_ADD_IMD
+    run_check 0, insertf128, 3 | OP_ADD_IMD | OP_SRC_HALF
+    run_check 1, insertf128, 3 | OP_ADD_IMD | OP_SRC_HALF
+    run_check 0, permd, 2
+    run_check 1, permd, 2
+    run_check 0, permq, 1 | OP_ADD_IMD
+    run_check 1, permq, 1 | OP_ADD_IMD
+    run_check 0, perm2f128, 2 | OP_ADD_IMD
+    run_check 1, perm2f128, 2 | OP_ADD_IMD
+    run_check 0, pbroadcastw, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
+    run_check 1, pbroadcastw, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
     
     run_check 0, addps, 2
     run_check 1, addps, 2

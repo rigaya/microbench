@@ -45,11 +45,13 @@ extern INIT_DIVIDER_D
     %define STR_VEX
 %endif
 
-%define OP_TYPE      0x07
-%define OP_ADD_IMD   0x08
-%define OP_SKIP_0_3  0x10
-%define OP_DIV_F     0x20
-%define OP_DIV_D     0x40
+%define OP_TYPE      0x0007
+%define OP_ADD_IMD   0x0008
+%define OP_SKIP_0_3  0x0010
+%define OP_SKIP_0_3_SAME_REG  (0x0020 | OP_SKIP_0_3)
+%define OP_DIV_F     (0x0040 | OP_SKIP_0_3)
+%define OP_DIV_D     (0x0080 | OP_SKIP_0_3)
+%define OP_SRC_HALF  (0x0100 | OP_SKIP_0_3)
 
 %ifdef SIMD256
     %define rmm0  ymm0
@@ -101,56 +103,65 @@ extern INIT_DIVIDER_D
 
 
 %macro inst_same_reg 3
+    %if ((%3) & OP_SKIP_0_3) != 0
+        %if ((%3) & OP_SRC_HALF) == OP_SRC_HALF
+            %define SRCMM xmm0
+        %else
+            %define SRCMM rmm0
+        %endif
+    %else
+        %define SRCMM %2
+    %endif
     %if ((%3) & OP_ADD_IMD) != 0
         %ifdef USE_VEX
             %if   ((%3) & OP_TYPE) = 0
-                v %+ %1 %2, %2, 1
+                v %+ %1 %2, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 1
-                v %+ %1 %2, %2, 1
+                v %+ %1 %2, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 2
-                v %+ %1 %2, %2, %2, 1
+                v %+ %1 %2, %2, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 3
-                v %+ %1 %2, %2, %2, 1
+                v %+ %1 %2, %2, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 4
-                v %+ %1 %2, %2, %2, %2, 1
+                v %+ %1 %2, %2, %2, SRCMM, 1
             %endif
         %else
             %if ((%3) & OP_TYPE) = 0
                 %1 %2, 1
             %elif ((%3) & OP_TYPE) = 1
-                %1 %2, %2, 1
+                %1 %2, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 2
-                %1 %2, %2, 1
+                %1 %2, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 3
-                %1 %2, %2, %2, 1
+                %1 %2, %2, SRCMM, 1
             %else
-                %1 %2, %2, %2, 1
+                %1 %2, %2, SRCMM, 1
             %endif
         %endif
     %else
         %ifdef USE_VEX
             %if   ((%3) & OP_TYPE) = 0
-                v %+ %1 %2
+                v %+ %1 SRCMM
             %elif ((%3) & OP_TYPE) = 1
-                v %+ %1 %2, %2
+                v %+ %1 %2, SRCMM
             %elif ((%3) & OP_TYPE) = 2
-                v %+ %1 %2, %2, %2
+                v %+ %1 %2, %2, SRCMM
             %elif ((%3) & OP_TYPE) = 3
-                v %+ %1 %2, %2, %2
+                v %+ %1 %2, %2, SRCMM
             %elif ((%3) & OP_TYPE) = 4
-                v %+ %1 %2, %2, %2, %2
+                v %+ %1 %2, %2, %2, SRCMM
             %endif
         %else
             %if ((%3) & OP_TYPE) = 0
                 %1 %2
             %elif ((%3) & OP_TYPE) = 1
-                %1 %2, %2
+                %1 %2, SRCMM
             %elif ((%3) & OP_TYPE) = 2
-                %1 %2, %2
+                %1 %2, SRCMM
             %elif ((%3) & OP_TYPE) = 3
-                %1 %2, %2, %2
+                %1 %2, %2, SRCMM
             %else
-                %1 %2, %2, %2
+                %1 %2, %2, SRCMM
             %endif
         %endif
     %endif
@@ -175,75 +186,19 @@ extern INIT_DIVIDER_D
     inst_same_reg %1, rmm15, %2
 %endmacro
 
-%macro inst_skip_0_3 3
-    %if ((%3) & OP_ADD_IMD) != 0
-        %ifdef USE_VEX
-            %if   ((%3) & OP_TYPE) = 0
-                v %+ %1 %2, rmm0, 1
-            %elif ((%3) & OP_TYPE) = 1
-                v %+ %1 %2, rmm0, 1
-            %elif ((%3) & OP_TYPE) = 2
-                v %+ %1 %2, %2, rmm0, 1
-            %elif ((%3) & OP_TYPE) = 3
-                v %+ %1 %2, %2, rmm0, 1
-            %elif ((%3) & OP_TYPE) = 4
-                v %+ %1 %2, %2, %2, rmm0, 1
-            %endif
-        %else
-            %if ((%3) & OP_TYPE) = 0
-                %1 %2, 1
-            %elif ((%3) & OP_TYPE) = 1
-                %1 %2, rmm0, 1
-            %elif ((%3) & OP_TYPE) = 2
-                %1 %2, rmm0, 1
-            %elif ((%3) & OP_TYPE) = 3
-                %1 %2, %2, rmm0, 1
-            %else
-                %1 %2, %2, rmm0, 1
-            %endif
-        %endif
-    %else
-        %ifdef USE_VEX
-            %if   ((%3) & OP_TYPE) = 0
-                v %+ %1 %2
-            %elif ((%3) & OP_TYPE) = 1
-                v %+ %1 %2, rmm0
-            %elif ((%3) & OP_TYPE) = 2
-                v %+ %1 %2, %2, rmm0
-            %elif ((%3) & OP_TYPE) = 3
-                v %+ %1 %2, %2, rmm0
-            %elif ((%3) & OP_TYPE) = 4
-                v %+ %1 %2, %2, %2, rmm0
-            %endif
-        %else
-            %if ((%3) & OP_TYPE) = 0
-                %1 %2
-            %elif ((%3) & OP_TYPE) = 1
-                %1 %2, rmm0
-            %elif ((%3) & OP_TYPE) = 2
-                %1 %2, rmm0
-            %elif ((%3) & OP_TYPE) = 3
-                %1 %2, %2, rmm0
-            %else
-                %1 %2, %2, rmm0
-            %endif
-        %endif
-    %endif
-%endmacro
-
 %macro test_throughput_skip_0_3 2
-    inst_skip_0_3 %1, rmm4,  %2
-    inst_skip_0_3 %1, rmm5,  %2
-    inst_skip_0_3 %1, rmm6,  %2
-    inst_skip_0_3 %1, rmm7,  %2
-    inst_skip_0_3 %1, rmm8,  %2
-    inst_skip_0_3 %1, rmm9,  %2
-    inst_skip_0_3 %1, rmm10, %2
-    inst_skip_0_3 %1, rmm11, %2
-    inst_skip_0_3 %1, rmm12, %2
-    inst_skip_0_3 %1, rmm13, %2
-    inst_skip_0_3 %1, rmm14, %2
-    inst_skip_0_3 %1, rmm15, %2
+    inst_same_reg %1, rmm4,  %2
+    inst_same_reg %1, rmm5,  %2
+    inst_same_reg %1, rmm6,  %2
+    inst_same_reg %1, rmm7,  %2
+    inst_same_reg %1, rmm8,  %2
+    inst_same_reg %1, rmm9,  %2
+    inst_same_reg %1, rmm10, %2
+    inst_same_reg %1, rmm11, %2
+    inst_same_reg %1, rmm12, %2
+    inst_same_reg %1, rmm13, %2
+    inst_same_reg %1, rmm14, %2
+    inst_same_reg %1, rmm15, %2
 %endmacro
 
 %macro test_throughput_pair 5
@@ -336,18 +291,23 @@ extern INIT_DIVIDER_D
 %endmacro
 
 %macro test_latency_skip_0_3 2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
-    inst_skip_0_3 %1, rmm5, %2
+    %if ((%2) & OP_SKIP_0_3_SAME_REG) == OP_SKIP_0_3_SAME_REG
+        %define DSTMM rmm0
+    %else
+        %define DSTMM rmm5
+    %endif
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
+    inst_same_reg %1, DSTMM, %2
 %endmacro
 
 %macro test_latency_pair 4
