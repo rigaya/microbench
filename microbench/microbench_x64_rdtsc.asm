@@ -97,6 +97,11 @@ section .text
     run_check 0, pblendvb, 3 | OP_SKIP_0_3
     run_check 1, pblendvb, 3 | OP_SKIP_0_3
 
+    run_check 0, pcmpeqw, 2 | OP_SKIP_0_3
+    run_check 1, pcmpeqw, 2 | OP_SKIP_0_3
+    run_check 0, pcmpgtw, 2 | OP_SKIP_0_3
+    run_check 1, pcmpgtw, 2 | OP_SKIP_0_3
+
     run_check 0, addps, 2
     run_check 1, addps, 2
     run_check 0, addpd, 2

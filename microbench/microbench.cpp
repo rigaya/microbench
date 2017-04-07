@@ -127,6 +127,9 @@ extern "C" {
     PROTOTYPE_256(permq);
     PROTOTYPE_256(perm2f128);
     PROTOTYPE_VEX(pbroadcastw);
+    PROTOTYPE(pcmpeqw);
+    PROTOTYPE(pcmpgtw);
+
     PROTOTYPE(addps);
     PROTOTYPE(addpd);
     PROTOTYPE(mulps);
@@ -235,6 +238,8 @@ check_inst_t check_list[] = {
     CREATE_LIST_256(AVX2, AVX2, permd, 0),
     CREATE_LIST_256(AVX2, AVX2, permq, 0),
     CREATE_LIST_VEX(AVX2, AVX2, pbroadcastw, 0),
+    CREATE_LIST(SSE2, AVX2, pcmpeqw, 0),
+    CREATE_LIST(SSE2, AVX2, pcmpgtw, 0),
     CREATE_LIST(SSE2, AVX, addps,  4),
     CREATE_LIST(SSE2, AVX, addpd,  2),
     CREATE_LIST(SSE2, AVX, mulps,  4),
