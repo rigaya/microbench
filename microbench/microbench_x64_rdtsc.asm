@@ -32,6 +32,9 @@ section .code
 
 section .text
 
+    run_check 0, movaps, 1
+    run_check 1, movaps, 1
+
     run_check 0, por, 2
     run_check 1, por, 2
     run_check 0, pand, 2
