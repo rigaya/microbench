@@ -104,10 +104,18 @@ extern INIT_DIVIDER_D
 
 
 %macro inst_same_reg 3
-    %if ((%3) & (OP_SRC_HALF) == OP_SRC_HALF)
-        %define SRCMM xmm %+ %2
+    %if (((%3) & OP_SKIP_0_3) == (OP_SKIP_0_3))
+        %if ((%3) & (OP_SRC_HALF) == OP_SRC_HALF)
+            %define SRCMM xmm0
+        %else
+            %define SRCMM rmm0
+        %endif
     %else
-        %define SRCMM rmm %+ %2
+        %if ((%3) & (OP_SRC_HALF) == OP_SRC_HALF)
+            %define SRCMM xmm %+ %2
+        %else
+            %define SRCMM rmm %+ %2
+        %endif
     %endif
 
     %if ((%3) & (OP_DST_HALF) == OP_DST_HALF)
