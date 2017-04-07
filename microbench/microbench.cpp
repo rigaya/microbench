@@ -153,6 +153,14 @@ extern "C" {
     PROTOTYPE_PAIR_VEX(fmadd132pd_addpd);
     PROTOTYPE_PAIR_VEX(fmadd132ps_mulps);
     PROTOTYPE_PAIR_VEX(fmadd132pd_mulpd);
+    PROTOTYPE(cmpeqps);
+    PROTOTYPE(cmpeqpd);
+    PROTOTYPE(cvttps2dq);
+    PROTOTYPE(cvttpd2dq);
+    PROTOTYPE(cvtdq2ps);
+    PROTOTYPE(cvtdq2pd);
+    PROTOTYPE(cvtps2pd);
+    PROTOTYPE(cvtpd2ps);
 
     alignas(32) float  INIT_DIVIDEND_F[8];
     alignas(32) double INIT_DIVIDEND_D[4];
@@ -264,6 +272,12 @@ check_inst_t check_list[] = {
     CREATE_LIST(SSE2, AVX, maxpd,  0),
     CREATE_LIST(SSE2, AVX, minps,  0),
     CREATE_LIST(SSE2, AVX, minpd,  0),
+    CREATE_LIST(SSE2, AVX, cvttps2dq,  0),
+    CREATE_LIST(SSE2, AVX, cvttpd2dq,  0),
+    CREATE_LIST(SSE2, AVX, cvtdq2ps,  0),
+    CREATE_LIST(SSE2, AVX, cvtdq2pd,  0),
+    CREATE_LIST(SSE2, AVX, cvtps2pd,  0),
+    CREATE_LIST(SSE2, AVX, cvtpd2ps,  0),
 };
 
 void init_const() {

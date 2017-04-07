@@ -175,3 +175,21 @@ section .text
     run_check_pair 1, fmadd132pd, 3, mulpd, 2, 0
     run_check_pair 0, fmadd132pd, 3, mulpd, 2, 1
     run_check_pair 1, fmadd132pd, 3, mulpd, 2, 1
+    
+    run_check 0, cmpeqps, 2 | OP_SKIP_0_3
+    run_check 1, cmpeqps, 2 | OP_SKIP_0_3
+    run_check 0, cmpeqpd, 2 | OP_SKIP_0_3
+    run_check 1, cmpeqpd, 2 | OP_SKIP_0_3
+    
+    run_check 0, cvttps2dq, 1
+    run_check 1, cvttps2dq, 1
+    run_check 0, cvttpd2dq, 1 | OP_DST_HALF
+    run_check 1, cvttpd2dq, 1 | OP_DST_HALF
+    run_check 0, cvtdq2ps, 1
+    run_check 1, cvtdq2ps, 1
+    run_check 0, cvtdq2pd, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
+    run_check 1, cvtdq2pd, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
+    run_check 0, cvtps2pd, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
+    run_check 1, cvtps2pd, 1 | OP_SRC_HALF | OP_SKIP_0_3 | OP_SKIP_0_3_SAME_REG
+    run_check 0, cvtpd2ps, 1 | OP_DST_HALF
+    run_check 1, cvtpd2ps, 1 | OP_DST_HALF

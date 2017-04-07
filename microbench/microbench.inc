@@ -52,6 +52,7 @@ extern INIT_DIVIDER_D
 %define OP_DIV_F     (0x0040 | OP_SKIP_0_3)
 %define OP_DIV_D     (0x0080 | OP_SKIP_0_3)
 %define OP_SRC_HALF  (0x0100 | OP_SKIP_0_3)
+%define OP_DST_HALF   0x0200
 
 %ifdef SIMD256
     %define rmm0  ymm0
@@ -168,37 +169,71 @@ extern INIT_DIVIDER_D
 %endmacro
 
 %macro test_throughput 2
-    inst_same_reg %1, rmm0,  %2
-    inst_same_reg %1, rmm1,  %2
-    inst_same_reg %1, rmm2,  %2
-    inst_same_reg %1, rmm3,  %2
-    inst_same_reg %1, rmm4,  %2
-    inst_same_reg %1, rmm5,  %2
-    inst_same_reg %1, rmm6,  %2
-    inst_same_reg %1, rmm7,  %2
-    inst_same_reg %1, rmm8,  %2
-    inst_same_reg %1, rmm9,  %2
-    inst_same_reg %1, rmm10, %2
-    inst_same_reg %1, rmm11, %2
-    inst_same_reg %1, rmm12, %2
-    inst_same_reg %1, rmm13, %2
-    inst_same_reg %1, rmm14, %2
-    inst_same_reg %1, rmm15, %2
+    %if ((%2) & (OP_DST_HALF) == OP_DST_HALF) 
+        inst_same_reg %1, xmm0,  %2
+        inst_same_reg %1, xmm1,  %2
+        inst_same_reg %1, xmm2,  %2
+        inst_same_reg %1, xmm3,  %2
+        inst_same_reg %1, xmm4,  %2
+        inst_same_reg %1, xmm5,  %2
+        inst_same_reg %1, xmm6,  %2
+        inst_same_reg %1, xmm7,  %2
+        inst_same_reg %1, xmm8,  %2
+        inst_same_reg %1, xmm9,  %2
+        inst_same_reg %1, xmm10, %2
+        inst_same_reg %1, xmm11, %2
+        inst_same_reg %1, xmm12, %2
+        inst_same_reg %1, xmm13, %2
+        inst_same_reg %1, xmm14, %2
+        inst_same_reg %1, xmm15, %2
+    %else
+        inst_same_reg %1, rmm0,  %2
+        inst_same_reg %1, rmm1,  %2
+        inst_same_reg %1, rmm2,  %2
+        inst_same_reg %1, rmm3,  %2
+        inst_same_reg %1, rmm4,  %2
+        inst_same_reg %1, rmm5,  %2
+        inst_same_reg %1, rmm6,  %2
+        inst_same_reg %1, rmm7,  %2
+        inst_same_reg %1, rmm8,  %2
+        inst_same_reg %1, rmm9,  %2
+        inst_same_reg %1, rmm10, %2
+        inst_same_reg %1, rmm11, %2
+        inst_same_reg %1, rmm12, %2
+        inst_same_reg %1, rmm13, %2
+        inst_same_reg %1, rmm14, %2
+        inst_same_reg %1, rmm15, %2
+    %endif
 %endmacro
 
 %macro test_throughput_skip_0_3 2
-    inst_same_reg %1, rmm4,  %2
-    inst_same_reg %1, rmm5,  %2
-    inst_same_reg %1, rmm6,  %2
-    inst_same_reg %1, rmm7,  %2
-    inst_same_reg %1, rmm8,  %2
-    inst_same_reg %1, rmm9,  %2
-    inst_same_reg %1, rmm10, %2
-    inst_same_reg %1, rmm11, %2
-    inst_same_reg %1, rmm12, %2
-    inst_same_reg %1, rmm13, %2
-    inst_same_reg %1, rmm14, %2
-    inst_same_reg %1, rmm15, %2
+    %if ((%2) & (OP_DST_HALF) == OP_DST_HALF) 
+        inst_same_reg %1, rmm4,  %2
+        inst_same_reg %1, rmm5,  %2
+        inst_same_reg %1, rmm6,  %2
+        inst_same_reg %1, rmm7,  %2
+        inst_same_reg %1, rmm8,  %2
+        inst_same_reg %1, rmm9,  %2
+        inst_same_reg %1, rmm10, %2
+        inst_same_reg %1, rmm11, %2
+        inst_same_reg %1, rmm12, %2
+        inst_same_reg %1, rmm13, %2
+        inst_same_reg %1, rmm14, %2
+        inst_same_reg %1, rmm15, %2
+    %else
+        inst_same_reg %1, rmm4,  %2
+        inst_same_reg %1, rmm5,  %2
+        inst_same_reg %1, rmm6,  %2
+        inst_same_reg %1, rmm7,  %2
+        inst_same_reg %1, rmm8,  %2
+        inst_same_reg %1, rmm9,  %2
+        inst_same_reg %1, rmm10, %2
+        inst_same_reg %1, rmm11, %2
+        inst_same_reg %1, rmm12, %2
+        inst_same_reg %1, rmm13, %2
+        inst_same_reg %1, rmm14, %2
+        inst_same_reg %1, rmm15, %2
+    %endif
 %endmacro
 
 %macro test_throughput_pair 5
@@ -272,29 +307,56 @@ extern INIT_DIVIDER_D
 %endmacro
 
 %macro test_latency 2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %1, rmm5, %2
+    %if ((%2) & (OP_DST_HALF) == OP_DST_HALF) 
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+        inst_same_reg %1, xmm5, %2
+    %else
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+        inst_same_reg %1, rmm5, %2
+    %endif
 %endmacro
 
 %macro test_latency_skip_0_3 2
     %if ((%2) & OP_SKIP_0_3_SAME_REG) == OP_SKIP_0_3_SAME_REG
-        %define DSTMM rmm0
+        %if ((%2) & (OP_DST_HALF) == OP_DST_HALF)
+            %define DSTMM xmm0
+        %else
+            %define DSTMM rmm0
+        %endif
     %else
-        %define DSTMM rmm5
+        %if ((%2) & (OP_DST_HALF) == OP_DST_HALF) 
+            %define DSTMM xmm5
+        %else
+            %define DSTMM rmm5
+        %endif
     %endif
     inst_same_reg %1, DSTMM, %2
     inst_same_reg %1, DSTMM, %2
