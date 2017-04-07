@@ -25,6 +25,9 @@
 ;
 ; --------------------------------------------------------------------------------------------
 
+%define USE_RDTSCP 1
+%define USE_VEX    1
+%define SIMD256    1
 %include "microbench.inc"
 
 section .code
