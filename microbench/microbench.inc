@@ -52,7 +52,7 @@ extern INIT_DIVIDER_D
 %define OP_DIV_F     (0x0040 | OP_SKIP_0_3)
 %define OP_DIV_D     (0x0080 | OP_SKIP_0_3)
 %define OP_SRC_HALF  (0x0100 | OP_SKIP_0_3)
-%define OP_DST_HALF   0x0200
+%define OP_DST_HALF  (0x0200)
 
 %ifdef SIMD256
     %define rmm0  ymm0
@@ -104,39 +104,42 @@ extern INIT_DIVIDER_D
 
 
 %macro inst_same_reg 3
-    %if ((%3) & OP_SKIP_0_3) != 0
-        %if ((%3) & OP_SRC_HALF) == OP_SRC_HALF
-            %define SRCMM xmm0
-        %else
-            %define SRCMM rmm0
-        %endif
+    %if ((%3) & (OP_SRC_HALF) == OP_SRC_HALF)
+        %define SRCMM xmm %+ %2
     %else
-        %define SRCMM %2
+        %define SRCMM rmm %+ %2
     %endif
+
+    %if ((%3) & (OP_DST_HALF) == OP_DST_HALF)
+        %define DSTMM xmm %+ %2
+    %else
+        %define DSTMM rmm %+ %2
+    %endif
+
     %if ((%3) & OP_ADD_IMD) != 0
         %ifdef USE_VEX
             %if   ((%3) & OP_TYPE) = 0
-                v %+ %1 %2, SRCMM, 1
+                v %+ %1 DSTMM, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 1
-                v %+ %1 %2, SRCMM, 1
+                v %+ %1 DSTMM, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 2
-                v %+ %1 %2, %2, SRCMM, 1
+                v %+ %1 DSTMM, DSTMM, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 3
-                v %+ %1 %2, %2, SRCMM, 1
+                v %+ %1 DSTMM, DSTMM, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 4
-                v %+ %1 %2, %2, %2, SRCMM, 1
+                v %+ %1 DSTMM, DSTMM, DSTMM, SRCMM, 1
             %endif
         %else
             %if ((%3) & OP_TYPE) = 0
-                %1 %2, 1
+                %1 DSTMM, 1
             %elif ((%3) & OP_TYPE) = 1
-                %1 %2, SRCMM, 1
+                %1 DSTMM, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 2
-                %1 %2, SRCMM, 1
+                %1 DSTMM, SRCMM, 1
             %elif ((%3) & OP_TYPE) = 3
-                %1 %2, %2, SRCMM, 1
+                %1 DSTMM, DSTMM, SRCMM, 1
             %else
-                %1 %2, %2, SRCMM, 1
+                %1 DSTMM, DSTMM, SRCMM, 1
             %endif
         %endif
     %else
@@ -144,267 +147,216 @@ extern INIT_DIVIDER_D
             %if   ((%3) & OP_TYPE) = 0
                 v %+ %1 SRCMM
             %elif ((%3) & OP_TYPE) = 1
-                v %+ %1 %2, SRCMM
+                v %+ %1 DSTMM, SRCMM
             %elif ((%3) & OP_TYPE) = 2
-                v %+ %1 %2, %2, SRCMM
+                v %+ %1 DSTMM, DSTMM, SRCMM
             %elif ((%3) & OP_TYPE) = 3
-                v %+ %1 %2, %2, SRCMM
+                v %+ %1 DSTMM, DSTMM, SRCMM
             %elif ((%3) & OP_TYPE) = 4
-                v %+ %1 %2, %2, %2, SRCMM
+                v %+ %1 DSTMM, DSTMM, DSTMM, SRCMM
             %endif
         %else
             %if ((%3) & OP_TYPE) = 0
-                %1 %2
+                %1 DSTMM
             %elif ((%3) & OP_TYPE) = 1
-                %1 %2, SRCMM
+                %1 DSTMM, SRCMM
             %elif ((%3) & OP_TYPE) = 2
-                %1 %2, SRCMM
+                %1 DSTMM, SRCMM
             %elif ((%3) & OP_TYPE) = 3
-                %1 %2, %2, SRCMM
+                %1 DSTMM, DSTMM, SRCMM
             %else
-                %1 %2, %2, SRCMM
+                %1 DSTMM, DSTMM, SRCMM
             %endif
         %endif
     %endif
 %endmacro
 
 %macro test_throughput 2
-    %if ((%2) & (OP_DST_HALF) == OP_DST_HALF) 
-        inst_same_reg %1, xmm0,  %2
-        inst_same_reg %1, xmm1,  %2
-        inst_same_reg %1, xmm2,  %2
-        inst_same_reg %1, xmm3,  %2
-        inst_same_reg %1, xmm4,  %2
-        inst_same_reg %1, xmm5,  %2
-        inst_same_reg %1, xmm6,  %2
-        inst_same_reg %1, xmm7,  %2
-        inst_same_reg %1, xmm8,  %2
-        inst_same_reg %1, xmm9,  %2
-        inst_same_reg %1, xmm10, %2
-        inst_same_reg %1, xmm11, %2
-        inst_same_reg %1, xmm12, %2
-        inst_same_reg %1, xmm13, %2
-        inst_same_reg %1, xmm14, %2
-        inst_same_reg %1, xmm15, %2
-    %else
-        inst_same_reg %1, rmm0,  %2
-        inst_same_reg %1, rmm1,  %2
-        inst_same_reg %1, rmm2,  %2
-        inst_same_reg %1, rmm3,  %2
-        inst_same_reg %1, rmm4,  %2
-        inst_same_reg %1, rmm5,  %2
-        inst_same_reg %1, rmm6,  %2
-        inst_same_reg %1, rmm7,  %2
-        inst_same_reg %1, rmm8,  %2
-        inst_same_reg %1, rmm9,  %2
-        inst_same_reg %1, rmm10, %2
-        inst_same_reg %1, rmm11, %2
-        inst_same_reg %1, rmm12, %2
-        inst_same_reg %1, rmm13, %2
-        inst_same_reg %1, rmm14, %2
-        inst_same_reg %1, rmm15, %2
-    %endif
+    inst_same_reg %1, 0,  %2
+    inst_same_reg %1, 1,  %2
+    inst_same_reg %1, 2,  %2
+    inst_same_reg %1, 3,  %2
+    inst_same_reg %1, 4,  %2
+    inst_same_reg %1, 5,  %2
+    inst_same_reg %1, 6,  %2
+    inst_same_reg %1, 7,  %2
+    inst_same_reg %1, 8,  %2
+    inst_same_reg %1, 9,  %2
+    inst_same_reg %1, 10, %2
+    inst_same_reg %1, 11, %2
+    inst_same_reg %1, 12, %2
+    inst_same_reg %1, 13, %2
+    inst_same_reg %1, 14, %2
+    inst_same_reg %1, 15, %2
 %endmacro
 
 %macro test_throughput_skip_0_3 2
-    %if ((%2) & (OP_DST_HALF) == OP_DST_HALF) 
-        inst_same_reg %1, rmm4,  %2
-        inst_same_reg %1, rmm5,  %2
-        inst_same_reg %1, rmm6,  %2
-        inst_same_reg %1, rmm7,  %2
-        inst_same_reg %1, rmm8,  %2
-        inst_same_reg %1, rmm9,  %2
-        inst_same_reg %1, rmm10, %2
-        inst_same_reg %1, rmm11, %2
-        inst_same_reg %1, rmm12, %2
-        inst_same_reg %1, rmm13, %2
-        inst_same_reg %1, rmm14, %2
-        inst_same_reg %1, rmm15, %2
-    %else
-        inst_same_reg %1, rmm4,  %2
-        inst_same_reg %1, rmm5,  %2
-        inst_same_reg %1, rmm6,  %2
-        inst_same_reg %1, rmm7,  %2
-        inst_same_reg %1, rmm8,  %2
-        inst_same_reg %1, rmm9,  %2
-        inst_same_reg %1, rmm10, %2
-        inst_same_reg %1, rmm11, %2
-        inst_same_reg %1, rmm12, %2
-        inst_same_reg %1, rmm13, %2
-        inst_same_reg %1, rmm14, %2
-        inst_same_reg %1, rmm15, %2
-    %endif
+    inst_same_reg %1, 4,  %2
+    inst_same_reg %1, 5,  %2
+    inst_same_reg %1, 6,  %2
+    inst_same_reg %1, 7,  %2
+    inst_same_reg %1, 8,  %2
+    inst_same_reg %1, 9,  %2
+    inst_same_reg %1, 10, %2
+    inst_same_reg %1, 11, %2
+    inst_same_reg %1, 12, %2
+    inst_same_reg %1, 13, %2
+    inst_same_reg %1, 14, %2
+    inst_same_reg %1, 15, %2
 %endmacro
 
 %macro test_throughput_pair 5
     %if %5 = 0
-        inst_same_reg %1, rmm0,  %2
-        inst_same_reg %3, rmm1,  %4
-        inst_same_reg %1, rmm2,  %2
-        inst_same_reg %3, rmm3,  %4
-        inst_same_reg %1, rmm4,  %2
-        inst_same_reg %3, rmm5,  %4
-        inst_same_reg %1, rmm6,  %2
-        inst_same_reg %3, rmm7,  %4
-        inst_same_reg %1, rmm8,  %2
-        inst_same_reg %3, rmm9,  %4
-        inst_same_reg %1, rmm10, %2
-        inst_same_reg %3, rmm11, %4
-        inst_same_reg %1, rmm12, %2
-        inst_same_reg %3, rmm13, %4
-        inst_same_reg %1, rmm14, %2
-        inst_same_reg %3, rmm15, %4
-        inst_same_reg %1, rmm0,  %2
-        inst_same_reg %3, rmm1,  %4
-        inst_same_reg %1, rmm2,  %2
-        inst_same_reg %3, rmm3,  %4
-        inst_same_reg %1, rmm4,  %2
-        inst_same_reg %3, rmm5,  %4
-        inst_same_reg %1, rmm6,  %2
-        inst_same_reg %3, rmm7,  %4
-        inst_same_reg %1, rmm8,  %2
-        inst_same_reg %3, rmm9,  %4
-        inst_same_reg %1, rmm10, %2
-        inst_same_reg %3, rmm11, %4
-        inst_same_reg %1, rmm12, %2
-        inst_same_reg %3, rmm13, %4
-        inst_same_reg %1, rmm14, %2
-        inst_same_reg %3, rmm15, %4
+        inst_same_reg %1, 0,  %2
+        inst_same_reg %3, 1,  %4
+        inst_same_reg %1, 2,  %2
+        inst_same_reg %3, 3,  %4
+        inst_same_reg %1, 4,  %2
+        inst_same_reg %3, 5,  %4
+        inst_same_reg %1, 6,  %2
+        inst_same_reg %3, 7,  %4
+        inst_same_reg %1, 8,  %2
+        inst_same_reg %3, 9,  %4
+        inst_same_reg %1, 10, %2
+        inst_same_reg %3, 11, %4
+        inst_same_reg %1, 12, %2
+        inst_same_reg %3, 13, %4
+        inst_same_reg %1, 14, %2
+        inst_same_reg %3, 15, %4
+        inst_same_reg %1, 0,  %2
+        inst_same_reg %3, 1,  %4
+        inst_same_reg %1, 2,  %2
+        inst_same_reg %3, 3,  %4
+        inst_same_reg %1, 4,  %2
+        inst_same_reg %3, 5,  %4
+        inst_same_reg %1, 6,  %2
+        inst_same_reg %3, 7,  %4
+        inst_same_reg %1, 8,  %2
+        inst_same_reg %3, 9,  %4
+        inst_same_reg %1, 10, %2
+        inst_same_reg %3, 11, %4
+        inst_same_reg %1, 12, %2
+        inst_same_reg %3, 13, %4
+        inst_same_reg %1, 14, %2
+        inst_same_reg %3, 15, %4
     %else
-        inst_same_reg %1, rmm0,  %2
-        inst_same_reg %3, rmm0,  %4
-        inst_same_reg %1, rmm1,  %2
-        inst_same_reg %3, rmm1,  %4
-        inst_same_reg %1, rmm2,  %2
-        inst_same_reg %3, rmm2,  %4
-        inst_same_reg %1, rmm3,  %2
-        inst_same_reg %3, rmm3,  %4
-        inst_same_reg %1, rmm4,  %2
-        inst_same_reg %3, rmm4,  %4
-        inst_same_reg %1, rmm5,  %2
-        inst_same_reg %3, rmm5,  %4
-        inst_same_reg %1, rmm6,  %2
-        inst_same_reg %3, rmm6,  %4
-        inst_same_reg %1, rmm7,  %2
-        inst_same_reg %3, rmm7,  %4
-        inst_same_reg %1, rmm8,  %2
-        inst_same_reg %3, rmm8,  %4
-        inst_same_reg %1, rmm9,  %2
-        inst_same_reg %3, rmm9,  %4
-        inst_same_reg %1, rmm10, %2
-        inst_same_reg %3, rmm10, %4
-        inst_same_reg %1, rmm11, %2
-        inst_same_reg %3, rmm11, %4
-        inst_same_reg %1, rmm12, %2
-        inst_same_reg %3, rmm12, %4
-        inst_same_reg %1, rmm13, %2
-        inst_same_reg %3, rmm13, %4
-        inst_same_reg %1, rmm14, %2
-        inst_same_reg %3, rmm14, %4
-        inst_same_reg %1, rmm15, %2
-        inst_same_reg %3, rmm15, %4
+        inst_same_reg %1, 0,  %2
+        inst_same_reg %3, 0,  %4
+        inst_same_reg %1, 1,  %2
+        inst_same_reg %3, 1,  %4
+        inst_same_reg %1, 2,  %2
+        inst_same_reg %3, 2,  %4
+        inst_same_reg %1, 3,  %2
+        inst_same_reg %3, 3,  %4
+        inst_same_reg %1, 4,  %2
+        inst_same_reg %3, 4,  %4
+        inst_same_reg %1, 5,  %2
+        inst_same_reg %3, 5,  %4
+        inst_same_reg %1, 6,  %2
+        inst_same_reg %3, 6,  %4
+        inst_same_reg %1, 7,  %2
+        inst_same_reg %3, 7,  %4
+        inst_same_reg %1, 8,  %2
+        inst_same_reg %3, 8,  %4
+        inst_same_reg %1, 9,  %2
+        inst_same_reg %3, 9,  %4
+        inst_same_reg %1, 10, %2
+        inst_same_reg %3, 10, %4
+        inst_same_reg %1, 11, %2
+        inst_same_reg %3, 11, %4
+        inst_same_reg %1, 12, %2
+        inst_same_reg %3, 12, %4
+        inst_same_reg %1, 13, %2
+        inst_same_reg %3, 13, %4
+        inst_same_reg %1, 14, %2
+        inst_same_reg %3, 14, %4
+        inst_same_reg %1, 15, %2
+        inst_same_reg %3, 15, %4
     %endif
 %endmacro
 
 %macro test_latency 2
-    %if ((%2) & (OP_DST_HALF) == OP_DST_HALF) 
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-        inst_same_reg %1, xmm5, %2
-    %else
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-        inst_same_reg %1, rmm5, %2
-    %endif
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
+    inst_same_reg %1, 5, %2
 %endmacro
 
 %macro test_latency_skip_0_3 2
     %if ((%2) & OP_SKIP_0_3_SAME_REG) == OP_SKIP_0_3_SAME_REG
-        %if ((%2) & (OP_DST_HALF) == OP_DST_HALF)
-            %define DSTMM xmm0
-        %else
-            %define DSTMM rmm0
-        %endif
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
+        inst_same_reg %1, 0, %2
     %else
-        %if ((%2) & (OP_DST_HALF) == OP_DST_HALF) 
-            %define DSTMM xmm5
-        %else
-            %define DSTMM rmm5
-        %endif
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
+        inst_same_reg %1, 5, %2
     %endif
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
-    inst_same_reg %1, DSTMM, %2
 %endmacro
 
 %macro test_latency_pair 4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
-    inst_same_reg %1, rmm5, %2
-    inst_same_reg %3, rmm5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
+    inst_same_reg %1, 5, %2
+    inst_same_reg %3, 5, %4
 %endmacro
 
 %macro init_reg_div 1

@@ -123,6 +123,7 @@ extern "C" {
     PROTOTYPE_NO_256(pblendvb);
     PROTOTYPE_VEX(pblendvb);
     PROTOTYPE_VEX(pblendd);
+    PROTOTYPE_256(extractf128);
     PROTOTYPE_256(insertf128);
     PROTOTYPE_256(permd);
     PROTOTYPE_256(permq);
@@ -243,6 +244,7 @@ check_inst_t check_list[] = {
     CREATE_LIST_NO256(SSSE3, pblendvb, 0),
     CREATE_LIST_VEX(AVX, AVX2, pblendvb, 0),
     CREATE_LIST_VEX(AVX2, AVX2, pblendd, 0),
+    CREATE_LIST_256(AVX, AVX2, extractf128, 0),
     CREATE_LIST_256(AVX, AVX2, insertf128, 0),
     CREATE_LIST_256(AVX, AVX2, perm2f128, 0),
     CREATE_LIST_256(AVX2, AVX2, permd, 0),

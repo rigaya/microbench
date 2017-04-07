@@ -101,8 +101,10 @@ section .text
     run_check 1, pblendvb, 4
     run_check 0, pblendd, 3 | OP_ADD_IMD
     run_check 1, pblendd, 3 | OP_ADD_IMD
-    run_check 0, insertf128, 3 | OP_ADD_IMD | OP_SRC_HALF
-    run_check 1, insertf128, 3 | OP_ADD_IMD | OP_SRC_HALF
+    run_check 0, extractf128, 1 | OP_ADD_IMD | OP_DST_HALF
+    run_check 1, extractf128, 1 | OP_ADD_IMD | OP_DST_HALF
+    run_check 0, insertf128, 2 | OP_ADD_IMD | OP_SRC_HALF
+    run_check 1, insertf128, 2 | OP_ADD_IMD | OP_SRC_HALF
     run_check 0, permd, 2
     run_check 1, permd, 2
     run_check 0, permq, 1 | OP_ADD_IMD
