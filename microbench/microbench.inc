@@ -420,7 +420,7 @@ extern INIT_DIVIDER_D
         MOVAPS [rsp+regsize*8], rmm14
         MOVAPS [rsp+regsize*9], rmm15
         
-%if ((%3) & (OP_DIV_F | OP_DIV_D)) != 0
+%if ((%3) & (OP_DIV_F) == OP_DIV_F) | ((%3) & (OP_DIV_D) == OP_DIV_D)
         init_reg_div %3
 %else
         test_throughput xorps, 2
