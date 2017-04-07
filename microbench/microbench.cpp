@@ -90,7 +90,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    PROTOTYPE(movaps);
+    PROTOTYPE(movdqa);
     PROTOTYPE(por);
     PROTOTYPE(pand);
     PROTOTYPE(pandn);
@@ -211,7 +211,7 @@ typedef struct {
     { #x "serial(256)", runpls_ ## x ## _vex_256, runpts_ ## x ## _vex_256, flops_128op * 2, simd_256 | RDTSCP }*/
 
 check_inst_t check_list[] = {
-    CREATE_LIST(SSE2,  AVX2, movaps, 0),
+    CREATE_LIST(SSE2,  AVX2, movdqa, 0),
     CREATE_LIST(SSE2,  AVX2, por,    0),
     CREATE_LIST(SSE2,  AVX2, pand,   0),
     CREATE_LIST(SSE2,  AVX2, pandn,  0),
