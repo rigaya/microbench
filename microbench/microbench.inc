@@ -53,6 +53,7 @@ extern INIT_DIVIDER_D
 %define OP_DIV_D     (0x0080 | OP_SKIP_0_3)
 %define OP_SRC_HALF  (0x0100 | OP_SKIP_0_3)
 %define OP_DST_HALF  (0x0200)
+%define OP_SKIP_0_1  (0x0400)
 
 %ifdef SIMD256
     %define rmm0  ymm0
@@ -106,15 +107,27 @@ extern INIT_DIVIDER_D
 %macro inst_same_reg 3
     %if (((%3) & OP_SKIP_0_3) == (OP_SKIP_0_3))
         %if ((%3) & (OP_SRC_HALF) == OP_SRC_HALF)
-            %define SRCMM xmm0
+            %define SRCMM0 xmm0
+            %define SRCMM1 xmm1
         %else
-            %define SRCMM rmm0
+            %define SRCMM0 rmm0
+            %define SRCMM1 rmm1
+        %endif
+    %elif (((%3) & OP_SKIP_0_1) == (OP_SKIP_0_1))
+        %if ((%3) & (OP_SRC_HALF) == OP_SRC_HALF)
+            %define SRCMM0 xmm1
+            %define SRCMM1 xmm2
+        %else
+            %define SRCMM0 rmm1
+            %define SRCMM1 rmm2
         %endif
     %else
         %if ((%3) & (OP_SRC_HALF) == OP_SRC_HALF)
-            %define SRCMM xmm %+ %2
+            %define SRCMM0 xmm %+ %2
+            %define SRCMM1 xmm %+ %2
         %else
-            %define SRCMM rmm %+ %2
+            %define SRCMM0 rmm %+ %2
+            %define SRCMM1 rmm %+ %2
         %endif
     %endif
 
@@ -127,53 +140,53 @@ extern INIT_DIVIDER_D
     %if ((%3) & OP_ADD_IMD) != 0
         %ifdef USE_VEX
             %if   ((%3) & OP_TYPE) = 0
-                v %+ %1 DSTMM, SRCMM, 1
+                v %+ %1 DSTMM, SRCMM0, 1
             %elif ((%3) & OP_TYPE) = 1
-                v %+ %1 DSTMM, SRCMM, 1
+                v %+ %1 DSTMM, SRCMM0, 1
             %elif ((%3) & OP_TYPE) = 2
-                v %+ %1 DSTMM, DSTMM, SRCMM, 1
+                v %+ %1 DSTMM, DSTMM, SRCMM0, 1
             %elif ((%3) & OP_TYPE) = 3
-                v %+ %1 DSTMM, DSTMM, SRCMM, 1
+                v %+ %1 DSTMM, SRCMM1, SRCMM0, 1
             %elif ((%3) & OP_TYPE) = 4
-                v %+ %1 DSTMM, DSTMM, DSTMM, SRCMM, 1
+                v %+ %1 DSTMM, DSTMM, SRCMM1, SRCMM0, 1
             %endif
         %else
             %if ((%3) & OP_TYPE) = 0
                 %1 DSTMM, 1
             %elif ((%3) & OP_TYPE) = 1
-                %1 DSTMM, SRCMM, 1
+                %1 DSTMM, SRCMM0, 1
             %elif ((%3) & OP_TYPE) = 2
-                %1 DSTMM, SRCMM, 1
+                %1 DSTMM, SRCMM0, 1
             %elif ((%3) & OP_TYPE) = 3
-                %1 DSTMM, DSTMM, SRCMM, 1
+                %1 DSTMM, SRCMM1, SRCMM0, 1
             %else
-                %1 DSTMM, DSTMM, SRCMM, 1
+                %1 DSTMM, SRCMM1, SRCMM0, 1
             %endif
         %endif
     %else
         %ifdef USE_VEX
             %if   ((%3) & OP_TYPE) = 0
-                v %+ %1 SRCMM
+                v %+ %1 SRCMM0
             %elif ((%3) & OP_TYPE) = 1
-                v %+ %1 DSTMM, SRCMM
+                v %+ %1 DSTMM, SRCMM0
             %elif ((%3) & OP_TYPE) = 2
-                v %+ %1 DSTMM, DSTMM, SRCMM
+                v %+ %1 DSTMM, DSTMM, SRCMM0
             %elif ((%3) & OP_TYPE) = 3
-                v %+ %1 DSTMM, DSTMM, SRCMM
+                v %+ %1 DSTMM, SRCMM1, SRCMM0
             %elif ((%3) & OP_TYPE) = 4
-                v %+ %1 DSTMM, DSTMM, DSTMM, SRCMM
+                v %+ %1 DSTMM, DSTMM, SRCMM1, SRCMM0
             %endif
         %else
             %if ((%3) & OP_TYPE) = 0
                 %1 DSTMM
             %elif ((%3) & OP_TYPE) = 1
-                %1 DSTMM, SRCMM
+                %1 DSTMM, SRCMM0
             %elif ((%3) & OP_TYPE) = 2
-                %1 DSTMM, SRCMM
+                %1 DSTMM, SRCMM0
             %elif ((%3) & OP_TYPE) = 3
-                %1 DSTMM, DSTMM, SRCMM
+                %1 DSTMM, SRCMM1, SRCMM0
             %else
-                %1 DSTMM, DSTMM, SRCMM
+                %1 DSTMM, SRCMM1, SRCMM0
             %endif
         %endif
     %endif
@@ -280,6 +293,116 @@ extern INIT_DIVIDER_D
         inst_same_reg %3, 14, %4
         inst_same_reg %1, 15, %2
         inst_same_reg %3, 15, %4
+    %endif
+%endmacro
+
+%macro test_throughput_pair_skip_0_3_part1 5
+    %if %5 = 0
+        inst_same_reg %3, 3,  %2
+        inst_same_reg %1, 4,  %2
+        inst_same_reg %3, 5,  %4
+        inst_same_reg %1, 6,  %2
+        inst_same_reg %3, 7,  %4
+        inst_same_reg %1, 8,  %2
+        inst_same_reg %3, 9,  %4
+        inst_same_reg %1, 10, %2
+        inst_same_reg %3, 11, %4
+        inst_same_reg %1, 12, %2
+        inst_same_reg %3, 13, %4
+        inst_same_reg %1, 14, %2
+        inst_same_reg %3, 15, %4
+        inst_same_reg %1, 3,  %2
+        inst_same_reg %3, 4,  %4
+        inst_same_reg %1, 5,  %2
+        inst_same_reg %3, 6,  %4
+        inst_same_reg %1, 7,  %2
+        inst_same_reg %3, 8,  %4
+        inst_same_reg %1,  9, %2
+        inst_same_reg %3, 10, %4
+        inst_same_reg %1, 11, %2
+        inst_same_reg %3, 12, %4
+        inst_same_reg %1, 13, %2
+        inst_same_reg %3, 14, %4
+        inst_same_reg %1, 15, %2
+    %else
+        inst_same_reg %1, 3,  %2
+        inst_same_reg %3, 3,  %4
+        inst_same_reg %1, 4,  %2
+        inst_same_reg %3, 4,  %4
+        inst_same_reg %1, 5,  %2
+        inst_same_reg %3, 5,  %4
+        inst_same_reg %1, 6,  %2
+        inst_same_reg %3, 6,  %4
+        inst_same_reg %1, 7,  %2
+        inst_same_reg %3, 7,  %4
+        inst_same_reg %1, 8,  %2
+        inst_same_reg %3, 8,  %4
+        inst_same_reg %1, 9,  %2
+        inst_same_reg %3, 9,  %4
+        inst_same_reg %1, 10, %2
+        inst_same_reg %3, 10, %4
+        inst_same_reg %1, 11, %2
+        inst_same_reg %3, 11, %4
+        inst_same_reg %1, 12, %2
+        inst_same_reg %3, 12, %4
+        inst_same_reg %1, 13, %2
+        inst_same_reg %3, 13, %4
+        inst_same_reg %1, 14, %2
+        inst_same_reg %3, 14, %4
+        inst_same_reg %1, 15, %2
+        inst_same_reg %3, 15, %4
+    %endif
+%endmacro
+
+%macro test_throughput_pair_skip_0_3_part2 5
+    %if %5 = 0
+        inst_same_reg %3, 3,  %2
+        inst_same_reg %1, 4,  %2
+        inst_same_reg %3, 5,  %4
+        inst_same_reg %1, 6,  %2
+        inst_same_reg %3, 7,  %4
+        inst_same_reg %1, 8,  %2
+        inst_same_reg %3, 9,  %4
+        inst_same_reg %1, 10, %2
+        inst_same_reg %3, 11, %4
+        inst_same_reg %1, 12, %2
+        inst_same_reg %3, 13, %4
+        inst_same_reg %1, 14, %2
+        inst_same_reg %3, 15, %4
+        inst_same_reg %1, 3,  %2
+        inst_same_reg %3, 4,  %4
+        inst_same_reg %1, 5,  %2
+        inst_same_reg %3, 6,  %4
+        inst_same_reg %1, 7,  %2
+        inst_same_reg xorps, 3, 2
+        inst_same_reg xorps, 4, 2
+        inst_same_reg xorps, 5, 2
+        inst_same_reg xorps, 6, 2
+        inst_same_reg xorps, 7, 2
+    %else
+        inst_same_reg %1, 3,  %2
+        inst_same_reg %3, 3,  %4
+        inst_same_reg %1, 4,  %2
+        inst_same_reg %3, 4,  %4
+        inst_same_reg %1, 5,  %2
+        inst_same_reg %3, 5,  %4
+        inst_same_reg %1, 6,  %2
+        inst_same_reg %3, 6,  %4
+        inst_same_reg %1, 7,  %2
+        inst_same_reg %3, 7,  %4
+        inst_same_reg %1, 8,  %2
+        inst_same_reg %3, 8,  %4
+        inst_same_reg %1, 9,  %2
+        inst_same_reg %3, 9,  %4
+        inst_same_reg %1, 10, %2
+        inst_same_reg %3, 10, %4
+        inst_same_reg %1, 11, %2
+        inst_same_reg %3, 11, %4
+        inst_same_reg xorps, 3, 2
+        inst_same_reg xorps, 4, 2
+        inst_same_reg xorps, 5, 2
+        inst_same_reg xorps, 6, 2
+        inst_same_reg xorps, 7, 2
     %endif
 %endmacro
 
@@ -440,7 +563,7 @@ extern INIT_DIVIDER_D
         align 16
     ._LOOP
         %if ((%3) & OP_SKIP_0_3) != 0
-            %if %1 = 0
+            %if (%1) = 0
                 test_throughput_skip_0_3 %2, %3
                 test_throughput_skip_0_3 %2, %3
                 test_throughput_skip_0_3 %2, %3
@@ -552,7 +675,7 @@ extern INIT_DIVIDER_D
         MOVAPS [rsp+regsize*8], rmm14
         MOVAPS [rsp+regsize*9], rmm15
         
-%if ((%3) & (OP_DIV_F | OP_DIV_D)) != 0
+%if ((%3) & (OP_DIV_F) == OP_DIV_F) | ((%3) & (OP_DIV_D) == OP_DIV_D)
         init_reg_div %3
 %else
         test_throughput xorps, 2
@@ -571,17 +694,33 @@ extern INIT_DIVIDER_D
 
         align 16
     ._LOOP
-        %if %1 = 0
-            test_throughput_pair %2, %3, %4, %5, %6
-            test_throughput_pair %2, %3, %4, %5, %6
-            test_throughput_pair %2, %3, %4, %5, %6
+        %if ((%3) & OP_SKIP_0_1) != 0
+            %if %1 = 0
+                test_throughput_pair_skip_0_3_part1 %2, %3, %4, %5, %6
+                test_throughput_pair_skip_0_3_part1 %2, %3, %4, %5, %6
+                test_throughput_pair_skip_0_3_part1 %2, %3, %4, %5, %6
+                test_throughput_pair_skip_0_3_part2 %2, %3, %4, %5, %6
+            %else
+                test_latency_pair %2, %3, %4, %5
+                test_latency_pair %2, %3, %4, %5
+                test_latency_pair %2, %3, %4, %5
+                test_latency_pair %2, %3, %4, %5
+                test_latency_pair %2, %3, %4, %5
+                test_latency_pair %2, %3, %4, %5
+            %endif
         %else
-            test_latency_pair %2, %3, %4, %5
-            test_latency_pair %2, %3, %4, %5
-            test_latency_pair %2, %3, %4, %5
-            test_latency_pair %2, %3, %4, %5
-            test_latency_pair %2, %3, %4, %5
-            test_latency_pair %2, %3, %4, %5
+            %if %1 = 0
+                test_throughput_pair %2, %3, %4, %5, %6
+                test_throughput_pair %2, %3, %4, %5, %6
+                test_throughput_pair %2, %3, %4, %5, %6
+            %else
+                test_latency_pair %2, %3, %4, %5
+                test_latency_pair %2, %3, %4, %5
+                test_latency_pair %2, %3, %4, %5
+                test_latency_pair %2, %3, %4, %5
+                test_latency_pair %2, %3, %4, %5
+                test_latency_pair %2, %3, %4, %5
+            %endif
         %endif
 
         dec esi

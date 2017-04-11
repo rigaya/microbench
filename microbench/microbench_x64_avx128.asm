@@ -41,24 +41,24 @@ section .text
     run_check 0, pbroadcastw, 1 | OP_SKIP_0_3_SAME_REG
     run_check 1, pbroadcastw, 1 | OP_SKIP_0_3_SAME_REG
 
-    run_check 0, fmadd132ps, 3
-    run_check 1, fmadd132ps, 3
-    run_check 0, fmadd132pd, 3
-    run_check 1, fmadd132pd, 3
+    run_check 0, fmadd132ps, 3 | OP_SKIP_0_3
+    run_check 1, fmadd132ps, 3 | OP_SKIP_0_3
+    run_check 0, fmadd132pd, 3 | OP_SKIP_0_3
+    run_check 1, fmadd132pd, 3 | OP_SKIP_0_3
     
-    run_check_pair 0, fmadd132ps, 3, addps, 2, 0
+    run_check_pair 0, fmadd132ps, 3 | OP_SKIP_0_1, addps, 2 | OP_SKIP_0_3, 0
     run_check_pair 1, fmadd132ps, 3, addps, 2, 0
-    run_check_pair 0, fmadd132ps, 3, addps, 2, 1
+    run_check_pair 0, fmadd132ps, 3 | OP_SKIP_0_1, addps, 2 | OP_SKIP_0_3, 1
     run_check_pair 1, fmadd132ps, 3, addps, 2, 1
-    run_check_pair 0, fmadd132pd, 3, addpd, 2, 0
+    run_check_pair 0, fmadd132pd, 3 | OP_SKIP_0_1, addpd, 2 | OP_SKIP_0_3, 0
     run_check_pair 1, fmadd132pd, 3, addpd, 2, 0
-    run_check_pair 0, fmadd132pd, 3, addpd, 2, 1
+    run_check_pair 0, fmadd132pd, 3 | OP_SKIP_0_1, addpd, 2 | OP_SKIP_0_3, 1
     run_check_pair 1, fmadd132pd, 3, addpd, 2, 1
-    run_check_pair 0, fmadd132ps, 3, mulps, 2, 0
+    run_check_pair 0, fmadd132ps, 3 | OP_SKIP_0_1, mulps, 2 | OP_SKIP_0_3, 0
     run_check_pair 1, fmadd132ps, 3, mulps, 2, 0
-    run_check_pair 0, fmadd132ps, 3, mulps, 2, 1
+    run_check_pair 0, fmadd132ps, 3 | OP_SKIP_0_1, mulps, 2 | OP_SKIP_0_3, 1
     run_check_pair 1, fmadd132ps, 3, mulps, 2, 1
-    run_check_pair 0, fmadd132pd, 3, mulpd, 2, 0
+    run_check_pair 0, fmadd132pd, 3 | OP_SKIP_0_1, mulpd, 2 | OP_SKIP_0_3, 0
     run_check_pair 1, fmadd132pd, 3, mulpd, 2, 0
-    run_check_pair 0, fmadd132pd, 3, mulpd, 2, 1
+    run_check_pair 0, fmadd132pd, 3 | OP_SKIP_0_1, mulpd, 2 | OP_SKIP_0_3, 1
     run_check_pair 1, fmadd132pd, 3, mulpd, 2, 1
